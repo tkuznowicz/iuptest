@@ -6,7 +6,7 @@
 #include <iup.h>
 
 /**
- * Funkcja obs³uguj¹ca klikniêcie "WyjdŸ" z menu "Plik"
+ * Funkcja obsÅ‚ugujÄ…ca klikniÄ™cie "WyjdÅº" z menu "Plik"
  **/
 int item_exit_action_cb(void) {
   //Zamyka okno
@@ -14,7 +14,7 @@ int item_exit_action_cb(void) {
 }
 
 /**
- * Funkcja obs³uguj¹ca klikniêcie "O programie" z menu "Pomoc"
+ * Funkcja obsÅ‚ugujÄ…ca klikniÄ™cie "O programie" z menu "Pomoc"
  **/
 int item_about_action_cb(void) {
   // Otwiera nowe okno dialogowe
@@ -32,13 +32,13 @@ int main(int argc, char **argv) {
 
   // 1.1 Plik
   //Elementy menu Plik
-  //W ogóle z jakiegoœ powodu windows nie obs³uguje polskich znaków w tych gui, dopóki nie zmienisz encodingu z utf8 na win1250 xd
-  //temu siê trzeba przyjrzeæ i ogarn¹æ to jakoœ
-  Ihandle *item_open = IupItem("Otwórz...", NULL);
+  //W ogÃ³le z jakiegoÅ› powodu windows nie obsÅ‚uguje polskich znakÃ³w w tych gui, dopÃ³ki nie zmienisz encodingu z utf8 na win1250 xd
+  //temu siÄ™ trzeba przyjrzeÄ‡ i ogarnÄ…Ä‡ to jakoÅ›
+  Ihandle *item_open = IupItem("OtwÃ³rz...", NULL);
   Ihandle *item_saveas = IupItem("Zapisz jako...", NULL);
-  Ihandle *item_exit = IupItem("WyjdŸ", NULL);
+  Ihandle *item_exit = IupItem("WyjdÅº", NULL);
 
-  //Zawartoœæ rozwijanej listy
+  //ZawartoÅ›Ä‡ rozwijanej listy
   Ihandle *file_menu = IupMenu(
     item_open,
     item_saveas,
@@ -47,13 +47,13 @@ int main(int argc, char **argv) {
     item_exit,
     NULL);
 
-  //Sam przycisk rozwijaj¹cy menu
+  //Sam przycisk rozwijajÄ…cy menu
   Ihandle *sub_menu_file = IupSubmenu("Plik", file_menu);
 
 
   // 1.2 Edycja (Pusty)
 
-  //Zawartoœæ rozwijanej listy
+  //ZawartoÅ›Ä‡ rozwijanej listy
   Ihandle *edit_menu = IupMenu(NULL);
   //Przycisk
   Ihandle *sub_menu_edit = IupSubmenu("Edycja", edit_menu);
@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
 
   // 1.3 Widok (Pusty)
 
-  //Zawartoœæ rozwijanej listy
+  //ZawartoÅ›Ä‡ rozwijanej listy
   Ihandle *view_menu = IupMenu(NULL);
   //Przycisk
   Ihandle *sub_menu_view = IupSubmenu("Widok", view_menu);
@@ -71,14 +71,14 @@ int main(int argc, char **argv) {
   //Elementy menu Pomoc
   Ihandle *item_about = IupItem("O programie...", NULL);
 
-  //Zawartoœæ rozwijanej listy
+  //ZawartoÅ›Ä‡ rozwijanej listy
   Ihandle *help_menu = IupMenu(
     item_about,
     NULL);
   //Przycisk
   Ihandle *sub_menu_help = IupSubmenu("Pomoc", help_menu);
 
-  //Pasek menu z zawartoœci¹
+  //Pasek menu z zawartoÅ›ciÄ…
   Ihandle *menu = IupMenu(
     sub_menu_file,
     sub_menu_edit,
@@ -86,7 +86,7 @@ int main(int argc, char **argv) {
     sub_menu_help,
     NULL);
 
-  //Wywo³ywanie funkcji po naciœniêciu odpowiedniego elementu menu
+  //WywoÅ‚ywanie funkcji po naciÅ›niÄ™ciu odpowiedniego elementu menu
   IupSetCallback(item_exit, "ACTION", (Icallback)item_exit_action_cb);
   IupSetCallback(item_about, "ACTION", (Icallback)item_about_action_cb);
 
@@ -113,27 +113,27 @@ int main(int argc, char **argv) {
     IupSetAttributes(IupLabel(NULL), "SEPARATOR=VERTICAL"),
     btn_right,
     NULL);
-  //Margines i odstêp
+  //Margines i odstÄ™p
   IupSetAttribute(toolbar_hb, "MARGIN", "5x5");
   IupSetAttribute(toolbar_hb, "GAP", "2");
   IupSetAttribute(toolbar_hb, "EXPAND", "NO");
 
-  //Bia³e t³o pod toolbarem
+  //BiaÅ‚e tÅ‚o pod toolbarem
   Ihandle *frame = IupBackgroundBox(NULL);
   IupSetAttribute(frame, "BGCOLOR", "255 255 255");
   IupSetAttribute(frame, "CANVASBOX", "YES");
 
-  //Kontener z zawartoœci¹ okna (Vbox - vertical box)
+  //Kontener z zawartoÅ›ciÄ… okna (Vbox - vertical box)
   Ihandle *vbox = IupVbox(
     toolbar_hb,
     frame,
     NULL);
 
-  //G³ówne okno
+  //GÅ‚Ã³wne okno
   Ihandle *dlg = IupDialog(vbox);
-  //Podpiêcie menu do okna
+  //PodpiÄ™cie menu do okna
   IupSetAttributeHandle(dlg, "MENU", menu);
-  //Tytu³ okna
+  //TytuÅ‚ okna
   IupSetAttribute(dlg, "TITLE", "File Explorer");
   //Rozmiar okna
   IupSetAttribute(dlg, "SIZE", "HALFxHALF");
