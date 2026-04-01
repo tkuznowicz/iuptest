@@ -23,6 +23,15 @@ int item_about_click(void) {
   return IUP_DEFAULT;
 }
 
+Ihandle* create_button(char icon[], char tip[]) {
+  Ihandle *btn = IupButton(NULL, NULL);
+  IupSetAttribute(btn, "IMAGE", icon);
+  IupSetAttribute(btn, "FLAT", "Yes");
+  IupSetAttribute(btn, "CANFOCUS", "No");
+  IupSetAttribute(btn, "TIP", tip);
+  return btn;
+}
+
 int main(int argc, char **argv) {
   //Inicjalizacja Iup i IupImgLib (do ikon)
   IupOpen(&argc, &argv);
@@ -93,63 +102,15 @@ int main(int argc, char **argv) {
 
   // 2. Toolbar z ikonami
 
-  //Przycisk - Lewo
-  Ihandle *btn_left = IupButton(NULL, NULL);
-  IupSetAttribute(btn_left, "IMAGE", "IUP_ArrowLeft");
-  IupSetAttribute(btn_left, "FLAT", "Yes");
-  IupSetAttribute(btn_left, "CANFOCUS", "No");
-  IupSetAttribute(btn_left, "TIP", "Wstecz");
-
-  //Przycisk - Prawo
-  Ihandle *btn_right = IupButton(NULL, NULL);
-  IupSetAttribute(btn_right, "IMAGE", "IUP_ArrowRight");
-  IupSetAttribute(btn_right, "FLAT", "Yes");
-  IupSetAttribute(btn_right, "CANFOCUS", "No");
-  IupSetAttribute(btn_right, "TIP", "Do przodu");
-
-  //Przycisk - Wytnij
-  Ihandle *btn_cut = IupButton(NULL, NULL);
-  IupSetAttribute(btn_cut, "IMAGE", "IUP_EditCut");
-  IupSetAttribute(btn_cut, "FLAT", "Yes");
-  IupSetAttribute(btn_cut, "CANFOCUS", "No");
-  IupSetAttribute(btn_cut, "TIP", "Wytnij");
-
-  //Przycisk - Kopiuj
-  Ihandle *btn_copy = IupButton(NULL, NULL);
-  IupSetAttribute(btn_copy, "IMAGE", "IUP_EditCopy");
-  IupSetAttribute(btn_copy, "FLAT", "Yes");
-  IupSetAttribute(btn_copy, "CANFOCUS", "No");
-  IupSetAttribute(btn_copy, "TIP", "Kopiuj");
-
-  //Przycisk - Wklej
-  Ihandle *btn_paste = IupButton(NULL, NULL);
-  IupSetAttribute(btn_paste, "IMAGE", "IUP_EditPaste");
-  IupSetAttribute(btn_paste, "FLAT", "Yes");
-  IupSetAttribute(btn_paste, "CANFOCUS", "No");
-  IupSetAttribute(btn_paste, "TIP", "Wklej");
-
-  //Przycisk - Usuń
-  Ihandle *btn_delete = IupButton(NULL, NULL);
-  IupSetAttribute(btn_delete, "IMAGE", "IUP_EditErase");
-  IupSetAttribute(btn_delete, "FLAT", "Yes");
-  IupSetAttribute(btn_delete, "CANFOCUS", "No");
-  IupSetAttribute(btn_delete, "TIP", "Usuń");
-
-  //Przycisk - Cofnij
-  Ihandle *btn_undo = IupButton(NULL, NULL);
-  IupSetAttribute(btn_undo, "IMAGE", "IUP_EditUndo");
-  IupSetAttribute(btn_undo, "FLAT", "Yes");
-  IupSetAttribute(btn_undo, "CANFOCUS", "No");
-  IupSetAttribute(btn_undo, "TIP", "Cofnij");
-
-  //Przycisk - Ponów
-  Ihandle *btn_redo = IupButton(NULL, NULL);
-  IupSetAttribute(btn_redo, "IMAGE", "IUP_EditRedo");
-  IupSetAttribute(btn_redo, "FLAT", "Yes");
-  IupSetAttribute(btn_redo, "CANFOCUS", "No");
-  IupSetAttribute(btn_redo, "TIP", "Ponów");
-
-
+  //Przyciski
+  Ihandle *btn_left = create_button("IUP_ArrowLeft", "Wstecz");
+  Ihandle *btn_right = create_button("IUP_ArrowRight", "Do przodu");
+  Ihandle *btn_cut = create_button("IUP_EditCut", "Wytnij");
+  Ihandle *btn_copy = create_button("IUP_EditCopy", "Kopiuj");
+  Ihandle *btn_paste = create_button("IUP_EditPaste", "Wklej");
+  Ihandle *btn_delete = create_button("IUP_EditErase", "Usuń");
+  Ihandle *btn_undo = create_button("IUP_EditUndo", "Cofnij");
+  Ihandle *btn_redo = create_button("IUP_EditRedo", "Powtórz");
 
   //Sam Toolbar (hbox - horizontal box)
   Ihandle *toolbar_hb = IupHbox(
