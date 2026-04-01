@@ -105,17 +105,29 @@ int main(int argc, char **argv) {
   //Przyciski
   Ihandle *btn_left = create_button("IUP_ArrowLeft", "Wstecz");
   Ihandle *btn_right = create_button("IUP_ArrowRight", "Do przodu");
-  Ihandle *btn_cut = create_button("IUP_EditCut", "Wytnij");
-  Ihandle *btn_copy = create_button("IUP_EditCopy", "Kopiuj");
-  Ihandle *btn_paste = create_button("IUP_EditPaste", "Wklej");
-  Ihandle *btn_delete = create_button("IUP_EditErase", "Usuń");
+  Ihandle *btn_up = create_button("IUP_ArrowUp", "Do góry");
+  Ihandle *btn_home = create_button("IUP_NavigateHome", "Katalog domowy");
+  Ihandle *btn_refresh = create_button("IUP_NavigateRefresh", "Odśwież");
+  Ihandle *btn_cut = create_button("IUP_EditCut", "Wytnij...");
+  Ihandle *btn_copy = create_button("IUP_EditCopy", "Kopiuj...");
+  Ihandle *btn_paste = create_button("IUP_EditPaste", "Wklej...");
+  Ihandle *btn_delete = create_button("IUP_EditErase", "Usuń...");
+  Ihandle *btn_properties = create_button("IUP_FileProperties", "Właściwości...");
+  Ihandle *btn_new_directory = create_button("IUP_FileClose", "Utwórz katalog...");
+  Ihandle *btn_new_file = create_button("IUP_FileNew", "Utwórz plik...");
   Ihandle *btn_undo = create_button("IUP_EditUndo", "Cofnij");
   Ihandle *btn_redo = create_button("IUP_EditRedo", "Powtórz");
+  Ihandle *btn_sort = create_button("IUP_ToolsSortAscend", "Sortowanie...");
+  Ihandle *btn_settings = create_button("IUP_ToolsSettings", "Ustawienia");
+  Ihandle *btn_help = create_button("IUP_MessageHelp", "Pomoc");
 
   //Sam Toolbar (hbox - horizontal box)
   Ihandle *toolbar_hb = IupHbox(
     btn_left,
     btn_right,
+    btn_up,
+    btn_home,
+    btn_refresh,
     //Separator
     IupSetAttributes(IupLabel(NULL), "SEPARATOR=VERTICAL"),
     btn_cut,
@@ -124,8 +136,20 @@ int main(int argc, char **argv) {
     btn_delete,
     //Separator
     IupSetAttributes(IupLabel(NULL), "SEPARATOR=VERTICAL"),
+    btn_properties,
+    btn_new_directory,
+    btn_new_file,
+    //Separator
+    IupSetAttributes(IupLabel(NULL), "SEPARATOR=VERTICAL"),
     btn_undo,
     btn_redo,
+    //Separator
+    IupSetAttributes(IupLabel(NULL), "SEPARATOR=VERTICAL"),
+    btn_sort,
+    //Separator
+    IupSetAttributes(IupLabel(NULL), "SEPARATOR=VERTICAL"),
+    btn_settings,
+    btn_help,
     NULL);
   //Margines i odstęp
   IupSetAttribute(toolbar_hb, "MARGIN", "5x5");
@@ -143,6 +167,7 @@ int main(int argc, char **argv) {
   IupSetAttribute(address_bar, "EDITBOX", "YES");
   IupSetAttribute(address_bar, "DROPDOWN", "YES");
   IupSetAttribute(address_bar, "EXPAND", "HORIZONTAL");
+
 
   //Kontener na pasek adresu
   Ihandle *address_bar_container = IupHbox(address_bar_label, address_bar, NULL);
