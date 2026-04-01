@@ -7,5 +7,5 @@ include_directories(lib/iup/include)
 link_directories(lib/iup)
 link_libraries(iup iupimglib)
 
-add_executable(iuptest main.c)
+add_executable(iuptest main.c etc/iup.rc)
 target_link_libraries(iuptest iup iupimglib)

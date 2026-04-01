@@ -160,6 +160,7 @@ int main(int argc, char **argv) {
   Ihandle *address_bar_label = IupLabel("Adres:");
   IupSetAttribute(address_bar_label, "ALIGNMENT", "ACENTER:ACENTER");
   IupSetAttribute(address_bar_label, "EXPAND", "VERTICALFREE");
+  IupSetAttribute(address_bar_label, "PADDING", "10");
 
 
   //Pasek adresu
@@ -168,11 +169,19 @@ int main(int argc, char **argv) {
   IupSetAttribute(address_bar, "DROPDOWN", "YES");
   IupSetAttribute(address_bar, "EXPAND", "HORIZONTAL");
 
+  //Szukajka
+  Ihandle *search_bar = IupText(NULL);
+  IupSetAttribute(search_bar, "TIP", "Szukaj...");
+  IupSetAttribute(search_bar, "CUEBANNER", "Szukaj...");
+  IupSetAttribute(search_bar, "VISIBLECOLUMNS", "16");
+  IupSetAttribute(search_bar, "EXPAND", "VERTICALFREE");
+
+  //Przycisk do szukajki
+  Ihandle *btn_search = IupButton("Szukaj", NULL);
 
   //Kontener na pasek adresu
-  Ihandle *address_bar_container = IupHbox(address_bar_label, address_bar, NULL);
+  Ihandle *address_bar_container = IupHbox(address_bar_label, address_bar, search_bar, btn_search, NULL);
   IupSetAttribute(address_bar_container, "MARGIN", "5x");
-  IupSetAttribute(address_bar_container, "GAP", "10");
 
   //Białe tło pod toolbarem
   Ihandle *frame = IupBackgroundBox(NULL);
