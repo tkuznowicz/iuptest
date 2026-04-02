@@ -43,16 +43,10 @@ int main(int argc, char **argv) {
   //Elementy menu Plik
   //W ogóle z jakiegoś powodu windows nie obsługuje polskich znaków w tych gui, dopóki nie zmienisz encodingu z utf8 na win1250 xd
   //temu się trzeba przyjrzeć i ogarnąć to jakoś
-  Ihandle *item_open = IupItem("Otwórz...", NULL);
-  Ihandle *item_saveas = IupItem("Zapisz jako...", NULL);
   Ihandle *item_exit = IupItem("Wyjdź", NULL);
 
   //Zawartość rozwijanej listy
   Ihandle *file_menu = IupMenu(
-    item_open,
-    item_saveas,
-    //Separator
-    IupSeparator(),
     item_exit,
     NULL);
 
@@ -61,9 +55,11 @@ int main(int argc, char **argv) {
 
 
   // 1.2 Edycja (Pusty)
-
+  Ihandle *item_cut = IupItem("Wytnij", NULL);
+  Ihandle *item_copy = IupItem("Kopiuj", NULL);
+  Ihandle *item_paste = IupItem("Wklej", NULL);
   //Zawartość rozwijanej listy
-  Ihandle *edit_menu = IupMenu(NULL);
+  Ihandle *edit_menu = IupMenu(item_cut, item_copy, item_paste, NULL);
   //Przycisk
   Ihandle *sub_menu_edit = IupSubmenu("Edycja", edit_menu);
 
