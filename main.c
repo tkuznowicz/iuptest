@@ -26,9 +26,9 @@ int item_about_click(void) {
 Ihandle* create_button(char icon[], char tip[]) {
   Ihandle *btn = IupButton(NULL, NULL);
   IupSetAttribute(btn, "IMAGE", icon);
-  IupSetAttribute(btn, "FLAT", "Yes");
-  IupSetAttribute(btn, "CANFOCUS", "No");
-  IupSetAttribute(btn, "TIP", tip);
+  // IupSetAttribute(btn, "FLAT", "Yes");
+  // IupSetAttribute(btn, "CANFOCUS", "No");
+  // IupSetAttribute(btn, "TIP", tip);
   return btn;
 }
 
@@ -43,10 +43,13 @@ int main(int argc, char **argv) {
   //Elementy menu Plik
   //W ogóle z jakiegoś powodu windows nie obsługuje polskich znaków w tych gui, dopóki nie zmienisz encodingu z utf8 na win1250 xd
   //temu się trzeba przyjrzeć i ogarnąć to jakoś
+  Ihandle *item_settings = IupItem("Ustawienia", NULL);
   Ihandle *item_exit = IupItem("Wyjdź", NULL);
 
   //Zawartość rozwijanej listy
   Ihandle *file_menu = IupMenu(
+    item_settings,
+    IupSeparator(),
     item_exit,
     NULL);
 
@@ -58,10 +61,30 @@ int main(int argc, char **argv) {
   Ihandle *item_cut = IupItem("Wytnij", NULL);
   Ihandle *item_copy = IupItem("Kopiuj", NULL);
   Ihandle *item_paste = IupItem("Wklej", NULL);
+  Ihandle *item_delete = IupItem("Usuń", NULL);
+
+  Ihandle *item_undo = IupItem("Cofnij", NULL);
+  Ihandle *item_redo = IupItem("Ponów", NULL);
+
+  Ihandle *item_new_folder = IupItem("Nowy plik...", NULL);
+  Ihandle *item_new_file = IupItem("Nowy folder...", NULL);
+
+  Ihandle *item_properties = IupItem("Właściwości...", NULL);
   //Zawartość rozwijanej listy
-  Ihandle *edit_menu = IupMenu(item_cut, item_copy, item_paste, NULL);
+  Ihandle *edit_menu = IupMenu(item_undo, item_redo, IupSeparator(), item_cut, item_copy, item_paste, item_delete, IupSeparator(),
+    item_new_folder, item_new_file, IupSeparator(), item_properties, NULL);
   //Przycisk
   Ihandle *sub_menu_edit = IupSubmenu("Edycja", edit_menu);
+
+
+  Ihandle *item_back = IupItem("Wstecz", NULL);
+  Ihandle *item_forward = IupItem("Do przodu", NULL);
+  Ihandle *item_up = IupItem("Do góry", NULL);
+  Ihandle *item_home = IupItem("Katalog domowy", NULL);
+  Ihandle *item_refresh = IupItem("Odśwież", NULL);
+
+  Ihandle *nav_menu = IupMenu(item_back, item_forward, item_up, item_home, item_refresh, NULL);
+  Ihandle *sub_menu_nav = IupSubmenu("Nawigacja", nav_menu);
 
 
   // 1.3 Widok (Pusty)
@@ -87,6 +110,7 @@ int main(int argc, char **argv) {
   Ihandle *menu = IupMenu(
     sub_menu_file,
     sub_menu_edit,
+    sub_menu_nav,
     sub_menu_view,
     sub_menu_help,
     NULL);
