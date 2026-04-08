@@ -3,6 +3,8 @@
  **/
 #include <stdio.h>
 #include <stdlib.h>
+#include <dirent.h>
+#include <sys/stat.h>
 #include <iup.h>
 
 /**
@@ -26,10 +28,46 @@ int item_about_click(void) {
 Ihandle* create_button(char icon[], char tip[]) {
   Ihandle *btn = IupButton(NULL, NULL);
   IupSetAttribute(btn, "IMAGE", icon);
-  // IupSetAttribute(btn, "FLAT", "Yes");
-  // IupSetAttribute(btn, "CANFOCUS", "No");
-  // IupSetAttribute(btn, "TIP", tip);
+  IupSetAttribute(btn, "FLAT", "Yes");
+  IupSetAttribute(btn, "CANFOCUS", "No");
+  IupSetAttribute(btn, "TIP", tip);
   return btn;
+}
+
+
+void listDirectories(const char *basePath, const int root, const int depth, Ihandle *tree) {
+  struct dirent *entry;
+  DIR *dir = opendir(basePath);
+
+  if (dir == NULL) {
+    perror("Unable to open directory");
+    return;
+  }
+
+  while ((entry = readdir(dir)) != NULL) {
+    if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
+      continue;
+    }
+    char depthc[16];
+    char path[1024];
+    if (root)
+      snprintf(path, sizeof(path), "/%s", entry->d_name);
+    else
+      snprintf(path, sizeof(path), "%s/%s", basePath, entry->d_name);
+
+    printf("%s\n", path);
+    struct stat statbuf;
+    if (stat(path, &statbuf) == 0 && S_ISDIR(statbuf.st_mode)) {
+      sprintf(depthc, "ADDBRANCH%d", depth);
+      IupSetAttribute(tree, depthc,entry->d_name);
+      // listDirectories(path, 0, depth+1, tree);
+    } else {
+      sprintf(depthc, "ADDLEAF%d", depth);
+      IupSetAttribute(tree, depthc,entry->d_name);
+    }
+  }
+
+  closedir(dir);
 }
 
 int main(int argc, char **argv) {
@@ -203,16 +241,30 @@ int main(int argc, char **argv) {
   Ihandle *address_bar_container = IupHbox(address_bar_label, address_bar, search_bar, btn_search, NULL);
   IupSetAttribute(address_bar_container, "MARGIN", "5x");
 
-  //Białe tło pod toolbarem
+  //Drzewo katalogów
+  Ihandle *dir_list = IupTree();
+  IupSetHandle("tree", dir_list);
+  IupSetAttribute(dir_list, "EXPAND", "VERTICAL");
+
+
+  // Białe tło pod toolbarem
   Ihandle *frame = IupBackgroundBox(NULL);
   IupSetAttribute(frame, "BGCOLOR", "255 255 255");
   IupSetAttribute(frame, "CANVASBOX", "YES");
+  IupSetAttribute(frame, "EXPAND", "YES");
+
+
+  Ihandle *main_hbox = IupHbox(
+    dir_list,
+    frame,
+    NULL);
 
   //Kontener z zawartością okna (Vbox - vertical box)
   Ihandle *vbox = IupVbox(
     toolbar_hb,
     address_bar_container,
-    frame,
+    main_hbox,
+    // frame,
     NULL);
 
   //Główne okno
@@ -230,6 +282,11 @@ int main(int argc, char **argv) {
   IupShowXY(dlg, IUP_CENTERPARENT, IUP_CENTERPARENT);
   //Rozmiar okna
   IupSetAttribute(dlg, "USERSIZE", NULL);
+
+
+  IupSetAttribute(dir_list, "TITLE","/");
+  //TODO
+  listDirectories("D:\\", 0, 0, dir_list);
 
   IupMainLoop();
 
