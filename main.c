@@ -50,17 +50,15 @@ void listDirectories(const char *basePath, const int root, const int depth, Ihan
     }
     char depthc[16];
     char path[1024];
-    if (root)
-      snprintf(path, sizeof(path), "/%s", entry->d_name);
-    else
-      snprintf(path, sizeof(path), "%s/%s", basePath, entry->d_name);
+    snprintf(path, sizeof(path), "%s/%s", basePath, entry->d_name);
 
     printf("%s\n", path);
     struct stat statbuf;
     if (stat(path, &statbuf) == 0 && S_ISDIR(statbuf.st_mode)) {
       sprintf(depthc, "ADDBRANCH%d", depth);
       IupSetAttribute(tree, depthc,entry->d_name);
-      // listDirectories(path, 0, depth+1, tree);
+      sprintf(depthc, "ADDLEAF%d", depth+1);
+      IupSetAttribute(tree, depthc,"<empty>");
     } else {
       sprintf(depthc, "ADDLEAF%d", depth);
       IupSetAttribute(tree, depthc,entry->d_name);
@@ -285,8 +283,9 @@ int main(int argc, char **argv) {
 
 
   IupSetAttribute(dir_list, "TITLE","/");
+  IupSetAttribute(dir_list, "ADDEXPANDED","NO");
   //TODO
-  listDirectories("D:\\", 0, 0, dir_list);
+  listDirectories("C:\\", 0, 0, dir_list);
 
   IupMainLoop();
 
