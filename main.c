@@ -6,6 +6,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <iup.h>
+#include <string.h>
 
 /**
  * Funkcja obsługująca kliknięcie "Wyjdź" z menu "Plik"
