@@ -261,10 +261,20 @@ int main(int argc, char **argv) {
   IupSetAttribute(frame, "CANVASBOX", "YES");
   IupSetAttribute(frame, "EXPAND", "YES");
 
+  //StatusBar
+  Ihandle *status_bar = IupLabel("test statusbara");
+  IupSetAttribute(status_bar, "EXPAND", "HORIZONTAL");
+  IupSetAttribute(status_bar, "PADDING", "10x5");
+
+  //Kontener do okna plikow
+  Ihandle *file_list = IupVbox(
+    frame,
+    status_bar);
+
 
   Ihandle *main_hbox = IupHbox(
     dir_list,
-    frame,
+    file_list,
     NULL);
 
   //Kontener z zawartością okna (Vbox - vertical box)
