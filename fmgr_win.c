@@ -33,7 +33,7 @@ void list_directories(const char *basePath, const int root, const int depth, Iha
         if (stat(test, &statbuf) == 0 && S_ISDIR(statbuf.st_mode)) {
             IupSetAttributeId(tree, "ADDBRANCH", depth, entry->d_name);
             IupTreeSetUserId(tree, IupGetInt(tree, "LASTADDNODE"), test);
-            IupSetAttributeId(tree, "ADDLEAF", depth+1, "<empty>");
+            IupSetAttributeId(tree, "ADDLEAF", IupGetInt(tree, "LASTADDNODE"), "<empty>");
         } else {
             IupSetAttributeId(tree, "ADDLEAF", depth, entry->d_name);
         }

@@ -24,10 +24,13 @@ int item_about_click(void) {
   return IUP_DEFAULT;
 }
 
-int tree_node_open(Ihandle *ih, const int id) {
-  printf("event for %d\n", id);
-  printf("%s\n", IupGetAttributeId(ih, "TITLE", id));
-  printf("%s\n", (char *)IupTreeGetUserId(ih, id));
+int tree_node_open(Ihandle *tree, const int id) {
+  // printf("%s\n", IupGetAttributeId(ih, "TITLE", id));
+  // printf("%s\n", );
+  // char* p[1024] = (char *)IupTreeGetUserId(tree, id);
+  IupSetAttributeId(tree, "DELNODE", id, "CHILDREN");
+  list_directories((char *)IupTreeGetUserId(tree, id), 0, id, tree);
+
   return IUP_DEFAULT;
 }
 
