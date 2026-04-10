@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 4.1.2)
 project(iuptest C)
 
+
 set(CMAKE_C_STANDARD 11)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 include_directories(lib/iup/include)

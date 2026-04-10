@@ -28,11 +28,18 @@ int item_about_click(void) {
   return IUP_DEFAULT;
 }
 
-int tree_branch_opened(Ihandle *tree, const int id) {
+void reload_directory(const int id) {
+  Ihandle *tree = IupGetHandle("tree");
   //Usuwamy placeholder
   IupSetAttributeId(tree, "DELNODE", id, "CHILDREN");
   //Dodajemy podkatalogi
   list_directories(IupTreeGetUserId(tree, id), id, tree);
+  IupSetAttributeId(tree, "STATE", id, "EXPANDED");
+}
+
+
+int tree_branch_opened(Ihandle *tree, const int id) {
+  reload_directory(id);
   return IUP_DEFAULT;
 }
 
@@ -63,7 +70,7 @@ int popup_tree_branch_open_click(void) {
   if (selected_node != -1) {
     open_directory_sys(IupTreeGetUserId(IupGetHandle("tree"), selected_node));
   } else {
-    fprintf(stderr, "Opening directory from right-click while no directory selected.");
+    fprintf(stderr, "Opening directory from right-click while no directory selected.\n");
   }
   return IUP_DEFAULT;
 }
@@ -74,7 +81,7 @@ int popup_tree_branch_expand_click(void) {
     tree_branch_opened(IupGetHandle("tree"), selected_node);
     IupSetAttributeId(IupGetHandle("tree"), "STATE", selected_node, "EXPANDED");
   } else {
-    fprintf(stderr, "Expanding directory from right-click while no directory selected.");
+    fprintf(stderr, "Expanding directory from right-click while no directory selected.\n");
   }
   return IUP_DEFAULT;
 }
@@ -83,7 +90,36 @@ int popup_tree_branch_collapse_click(void) {
   if (selected_node != -1) {
     IupSetAttributeId(IupGetHandle("tree"), "STATE", selected_node, "COLLAPSED");
   } else {
-    fprintf(stderr, "Collapsing directory from right-click while no directory selected.");
+    fprintf(stderr, "Collapsing directory from right-click while no directory selected.\n");
+  }
+  return IUP_DEFAULT;
+}
+
+int popup_tree_branch_delete_click(void) {
+  if (selected_node != -1) {
+    delete_directory(IupTreeGetUserId(IupGetHandle("tree"), selected_node));
+    const int parent = IupGetIntId(IupGetHandle("tree"), "PARENT", selected_node);
+    reload_directory(parent);
+  } else {
+    fprintf(stderr, "Deleting directory from right-click while no directory selected.\n");
+  }
+  return IUP_DEFAULT;
+}
+
+int popup_tree_leaf_delete_click(void) {
+  if (selected_node != -1) {
+    Ihandle *tree = IupGetHandle("tree");
+    //Scieżka do folderu (rodzica)
+    char file_path[2048];
+    const int parent = IupGetIntId(tree, "PARENT", selected_node);
+    const char* parent_path = IupTreeGetUserId(tree, parent);
+    strcpy(file_path, parent_path);
+    strcat(file_path, SEPARATOR);
+    strcat(file_path, IupGetAttributeId(tree, "TITLE", selected_node));
+    delete_file(file_path);
+    tree_branch_opened(tree, parent);
+  } else {
+    fprintf(stderr, "Deleting file from right-click while no file selected.\n");
   }
   return IUP_DEFAULT;
 }
@@ -339,6 +375,7 @@ int main(int argc, char **argv) {
   IupSetCallback(popup_tree_branch_open, "ACTION", (Icallback)popup_tree_branch_open_click);
   IupSetCallback(popup_tree_branch_expand, "ACTION", (Icallback)popup_tree_branch_expand_click);
   IupSetCallback(popup_tree_branch_collapse, "ACTION", (Icallback)popup_tree_branch_collapse_click);
+  IupSetCallback(popup_tree_branch_delete, "ACTION", (Icallback)popup_tree_branch_delete_click);
 
 
   //
@@ -355,7 +392,7 @@ int main(int argc, char **argv) {
     popup_tree_leaf_properties,
     NULL);
   IupSetHandle("popup_tree_leaf", popup_tree_leaf);
-
+  IupSetCallback(popup_tree_leaf_delete, "ACTION", (Icallback)popup_tree_leaf_delete_click);
 
 
 
@@ -378,7 +415,7 @@ int main(int argc, char **argv) {
   IupSetAttribute(dir_list, "ADDBRANCH-1","/");
   IupSetAttribute(dir_list, "ADDEXPANDED","NO");
   //TODO
-  list_directories("C:\\", 0, dir_list);
+  list_directories("Z:\\", 0, dir_list);
   IupSetAttribute(dir_list, "STATE0","EXPANDED");
 
   IupMainLoop();

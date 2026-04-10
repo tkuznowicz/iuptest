@@ -5,8 +5,11 @@
 #ifndef IUPTEST_FMGR_WIN_H
 #define IUPTEST_FMGR_WIN_H
 #include "iup.h"
+extern char SEPARATOR[1];
 
 void list_drives(void);
 void list_directories(const char *basePath, int depth, Ihandle *tree);
 void open_directory_sys(const char *path);
+void delete_file(const char *path);
+void delete_directory(const char *basePath);
 #endif //IUPTEST_FMGR_WIN_H
