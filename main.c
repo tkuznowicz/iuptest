@@ -26,9 +26,8 @@ int item_about_click(void) {
 
 int tree_node_open(Ihandle *ih, const int id) {
   printf("event for %d\n", id);
-  char state_name[20];
-  sprintf(state_name, "TITLE%d\n", id);
-  printf("%s", IupGetAttribute(ih, state_name));
+  printf("%s\n", IupGetAttributeId(ih, "TITLE", id));
+  printf("%s\n", (char *)IupTreeGetUserId(ih, id));
   return IUP_DEFAULT;
 }
 

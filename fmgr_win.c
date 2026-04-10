@@ -26,14 +26,16 @@ void list_directories(const char *basePath, const int root, const int depth, Iha
         if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
             continue;
         }
-        char path[1024];
-        snprintf(path, sizeof(path), "%s\\%s", basePath, entry->d_name);
+        char *test = malloc(1025);
+
+        snprintf(test, 1024, "%s\\%s", basePath, entry->d_name);
         struct stat statbuf;
-        if (stat(path, &statbuf) == 0 && S_ISDIR(statbuf.st_mode)) {
+        if (stat(test, &statbuf) == 0 && S_ISDIR(statbuf.st_mode)) {
             IupSetAttributeId(tree, "ADDBRANCH", depth, entry->d_name);
+            IupTreeSetUserId(tree, IupGetInt(tree, "LASTADDNODE"), test);
             IupSetAttributeId(tree, "ADDLEAF", depth+1, "<empty>");
         } else {
-            IupSetAttributeId(tree, "ADDLEAF", depth, "<empty>");
+            IupSetAttributeId(tree, "ADDLEAF", depth, entry->d_name);
         }
     }
 
