@@ -7,5 +7,5 @@
 #include "iup.h"
 
 void list_drives(void);
-void list_directories(const char *basePath, int root, int depth, Ihandle *tree);
+void list_directories(const char *basePath, int depth, Ihandle *tree);
 #endif //IUPTEST_FMGR_WIN_H

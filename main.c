@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <iup.h>
+#include <string.h>
 #include "fmgr_win.h"
 
 /**
@@ -24,15 +25,37 @@ int item_about_click(void) {
   return IUP_DEFAULT;
 }
 
-int tree_node_open(Ihandle *tree, const int id) {
-  // printf("%s\n", IupGetAttributeId(ih, "TITLE", id));
-  // printf("%s\n", );
-  // char* p[1024] = (char *)IupTreeGetUserId(tree, id);
+int tree_branch_opened(Ihandle *tree, const int id) {
+  //Usuwamy placeholder
   IupSetAttributeId(tree, "DELNODE", id, "CHILDREN");
-  list_directories((char *)IupTreeGetUserId(tree, id), 0, id, tree);
-
+  //Dodajemy podkatalogi
+  list_directories(IupTreeGetUserId(tree, id), id, tree);
   return IUP_DEFAULT;
 }
+
+int tree_branch_clicked(Ihandle *tree, const int id) {
+  // IupSetAttributeId(tree, "TITLEFONTSTYLE", id, "Bold");
+  IupSetAttribute(IupGetHandle("address_bar"), "VALUE", IupTreeGetUserId(tree, id));
+  return IUP_DEFAULT;
+}
+
+int tree_branch_right_clicked(Ihandle *tree, const int id) {
+  IupPopup(IupGetHandle("popup_tree_branch"), IUP_MOUSEPOS, IUP_MOUSEPOS);
+  return IUP_DEFAULT;
+}
+
+int tree_leaf_right_clicked(Ihandle *tree, const int id) {
+  IupPopup(IupGetHandle("popup_tree_leaf"), IUP_MOUSEPOS, IUP_MOUSEPOS);
+  return IUP_DEFAULT;
+}
+
+int tree_node_right_clicked(Ihandle *tree, const int id) {
+  const int is_branch = strcmp(IupGetAttributeId(tree, "KIND", id), "LEAF");
+  IupSetAttributeId(tree, "MARKED", id, "YES");
+  return is_branch ? tree_branch_right_clicked(tree, id) : tree_leaf_right_clicked(tree, id);
+}
+
+
 
 
 /**
@@ -206,6 +229,7 @@ int main(int argc, char **argv) {
   IupSetAttribute(address_bar, "EDITBOX", "YES");
   IupSetAttribute(address_bar, "DROPDOWN", "YES");
   IupSetAttribute(address_bar, "EXPAND", "HORIZONTAL");
+  IupSetHandle("address_bar", address_bar);
 
   //Szukajka
   Ihandle *search_bar = IupText(NULL);
@@ -224,7 +248,9 @@ int main(int argc, char **argv) {
   //Drzewo katalogów
   Ihandle *dir_list = IupTree();
   IupSetHandle("tree", dir_list);
-  IupSetCallback(dir_list, "BRANCHOPEN_CB", (Icallback)tree_node_open);
+  IupSetCallback(dir_list, "BRANCHOPEN_CB", (Icallback)tree_branch_opened);
+  IupSetCallback(dir_list, "EXECUTEBRANCH_CB", (Icallback)tree_branch_clicked);
+  IupSetCallback(dir_list, "RIGHTCLICK_CB", (Icallback)tree_node_right_clicked);
   IupSetAttribute(dir_list, "EXPAND", "VERTICAL");
   IupSetAttribute(dir_list, "ADDROOT", "FALSE");
 
@@ -249,6 +275,27 @@ int main(int argc, char **argv) {
     // frame,
     NULL);
 
+
+  //TEST - menu do drzewa katalogow
+  Ihandle *test1_el = IupItem("Otwórz katalog", NULL);
+
+  Ihandle *popup_tree_branch = IupMenu(
+    test1_el,
+    NULL);
+  IupSetHandle("popup_tree_branch", popup_tree_branch);
+
+
+  //
+  Ihandle *test2_el = IupItem("Otwórz plik", NULL);
+
+  Ihandle *popup_tree_leaf = IupMenu(
+    test2_el,
+    NULL);
+  IupSetHandle("popup_tree_leaf", popup_tree_leaf);
+
+
+
+
   //Główne okno
   Ihandle *dlg = IupDialog(vbox);
   //Podpięcie menu do okna
@@ -268,7 +315,7 @@ int main(int argc, char **argv) {
   IupSetAttribute(dir_list, "ADDBRANCH-1","/");
   IupSetAttribute(dir_list, "ADDEXPANDED","NO");
   //TODO
-  list_directories("C:/", 0, 0, dir_list);
+  list_directories("C:\\", 0, dir_list);
   IupSetAttribute(dir_list, "STATE0","EXPANDED");
 
   IupMainLoop();

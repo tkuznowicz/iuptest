@@ -13,7 +13,7 @@ void list_drives(void) {
 
 }
 
-void list_directories(const char *basePath, const int root, const int depth, Ihandle *tree) {
+void list_directories(const char *basePath, const int depth, Ihandle *tree) {
     struct dirent *entry;
     DIR *dir = opendir(basePath);
 
@@ -26,15 +26,21 @@ void list_directories(const char *basePath, const int root, const int depth, Iha
         if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
             continue;
         }
-        char *test = malloc(1025);
+        char *path = malloc(1025);
 
-        snprintf(test, 1024, "%s\\%s", basePath, entry->d_name);
+        //Formatujemy nowÄ… Ĺ›cieĹĽkÄ™
+        snprintf(path, 1024, "%s\\%s", basePath, entry->d_name);
         struct stat statbuf;
-        if (stat(test, &statbuf) == 0 && S_ISDIR(statbuf.st_mode)) {
+        //Sprawdzamy, czy podana Ĺ›cieĹĽka to katalog
+        if (stat(path, &statbuf) == 0 && S_ISDIR(statbuf.st_mode)) {
+            //Dodajemy nowÄ… gaĹ‚Ä…Ĺş (katalog)
             IupSetAttributeId(tree, "ADDBRANCH", depth, entry->d_name);
-            IupTreeSetUserId(tree, IupGetInt(tree, "LASTADDNODE"), test);
+            //Ustawiamy Ĺ›cieĹĽkÄ™ katalogu jako jego id
+            IupTreeSetUserId(tree, IupGetInt(tree, "LASTADDNODE"), path);
+            //Placeholder, ĹĽeby gaĹ‚Ä…Ĺş mogĹ‚a siÄ™ rozwinÄ…Ä‡
             IupSetAttributeId(tree, "ADDLEAF", IupGetInt(tree, "LASTADDNODE"), "<empty>");
         } else {
+            //Dodajemy liĹ›Ä‡ (plik)
             IupSetAttributeId(tree, "ADDLEAF", depth, entry->d_name);
         }
     }
