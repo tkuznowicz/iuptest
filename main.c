@@ -244,6 +244,7 @@ int main(int argc, char **argv) {
   Ihandle *dir_list = IupTree();
   IupSetHandle("tree", dir_list);
   IupSetAttribute(dir_list, "EXPAND", "VERTICAL");
+  IupSetAttribute(dir_list, "ADDROOT", "FALSE");
 
 
   // Białe tło pod toolbarem
@@ -282,11 +283,11 @@ int main(int argc, char **argv) {
   //Rozmiar okna
   IupSetAttribute(dlg, "USERSIZE", NULL);
 
-
-  IupSetAttribute(dir_list, "TITLE","/");
+  IupSetAttribute(dir_list, "ADDBRANCH-1","/");
   IupSetAttribute(dir_list, "ADDEXPANDED","NO");
   //TODO
   listDirectories("C:\\", 0, 0, dir_list);
+  IupSetAttribute(dir_list, "STATE0","EXPANDED");
 
   IupMainLoop();
 
