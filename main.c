@@ -7,6 +7,9 @@
 #include <string.h>
 #include "fmgr_win.h"
 
+char current_path[1024] = "";
+int selected_dir = -1;
+
 /**
  * Funkcja obsługująca kliknięcie "Wyjdź" z menu "Plik"
  **/
@@ -52,11 +55,18 @@ int tree_leaf_right_clicked(Ihandle *tree, const int id) {
 int tree_node_right_clicked(Ihandle *tree, const int id) {
   const int is_branch = strcmp(IupGetAttributeId(tree, "KIND", id), "LEAF");
   IupSetAttributeId(tree, "MARKED", id, "YES");
+  selected_dir = id;
   return is_branch ? tree_branch_right_clicked(tree, id) : tree_leaf_right_clicked(tree, id);
 }
 
-
-
+int popup_tree_branch_open_click(void) {
+  if (selected_dir != -1) {
+    open_directory_sys(IupTreeGetUserId(IupGetHandle("tree"), selected_dir));
+  } else {
+    fprintf(stderr, "Opening directory from right-click while no directory selected.");
+  }
+  return IUP_DEFAULT;
+}
 
 /**
  * Funkcja pomocnicza do tworzenia przycisków
@@ -214,7 +224,7 @@ int main(int argc, char **argv) {
     NULL);
   //Margines i odstęp
   IupSetAttribute(toolbar_hb, "MARGIN", "5x5");
-  IupSetAttribute(toolbar_hb, "GAP", "2");
+  IupSetAttribute(toolbar_hb, "GAP", "5");
   IupSetAttribute(toolbar_hb, "EXPAND", "NO");
 
   //Label dla paska adresu
@@ -244,6 +254,7 @@ int main(int argc, char **argv) {
   //Kontener na pasek adresu
   Ihandle *address_bar_container = IupHbox(address_bar_label, address_bar, search_bar, btn_search, NULL);
   IupSetAttribute(address_bar_container, "MARGIN", "5x");
+  IupSetAttribute(address_bar_container, "GAP", "5");
 
   //Drzewo katalogów
   Ihandle *dir_list = IupTree();
@@ -287,19 +298,28 @@ int main(int argc, char **argv) {
 
 
   //TEST - menu do drzewa katalogow
-  Ihandle *test1_el = IupItem("Otwórz katalog", NULL);
+  Ihandle *popup_tree_branch_open = IupItem("Otwórz katalog", NULL);
+  Ihandle *popup_tree_branch_rename = IupItem("Zmień nazwę", NULL);
+  Ihandle *popup_tree_branch_delete = IupItem("Usuń", NULL);
 
   Ihandle *popup_tree_branch = IupMenu(
-    test1_el,
+    popup_tree_branch_open,
+    popup_tree_branch_rename,
+    popup_tree_branch_delete,
     NULL);
   IupSetHandle("popup_tree_branch", popup_tree_branch);
+  IupSetCallback(popup_tree_branch_open, "ACTION", (Icallback)popup_tree_branch_open_click);
 
 
   //
-  Ihandle *test2_el = IupItem("Otwórz plik", NULL);
+  Ihandle *popup_tree_leaf_open = IupItem("Otwórz plik", NULL);
+  Ihandle *popup_tree_leaf_rename = IupItem("Zmień nazwę", NULL);
+  Ihandle *popup_tree_leaf_delete = IupItem("Usuń", NULL);
 
   Ihandle *popup_tree_leaf = IupMenu(
-    test2_el,
+    popup_tree_leaf_open,
+    popup_tree_leaf_rename,
+    popup_tree_leaf_delete,
     NULL);
   IupSetHandle("popup_tree_leaf", popup_tree_leaf);
 

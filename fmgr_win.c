@@ -44,6 +44,13 @@ void list_directories(const char *basePath, const int depth, Ihandle *tree) {
             IupSetAttributeId(tree, "ADDLEAF", depth, entry->d_name);
         }
     }
-
     closedir(dir);
+}
+
+void open_directory_sys(const char* path) {
+    char str[2048];
+    strcpy(str, "start \"\" \"");
+    strcat(str, path);
+    strcat(str, "\"");
+    system(str);
 }
