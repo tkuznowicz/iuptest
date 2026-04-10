@@ -3,10 +3,8 @@
  **/
 #include <stdio.h>
 #include <stdlib.h>
-#include <dirent.h>
-#include <sys/stat.h>
 #include <iup.h>
-#include <string.h>
+#include "fmgr_win.h"
 
 /**
  * Funkcja obsługująca kliknięcie "Wyjdź" z menu "Plik"
@@ -26,6 +24,21 @@ int item_about_click(void) {
   return IUP_DEFAULT;
 }
 
+int tree_node_open(Ihandle *ih, const int id) {
+  printf("event for %d\n", id);
+  char state_name[20];
+  sprintf(state_name, "TITLE%d\n", id);
+  printf("%s", IupGetAttribute(ih, state_name));
+  return IUP_DEFAULT;
+}
+
+
+/**
+ * Funkcja pomocnicza do tworzenia przycisków
+ * @param icon
+ * @param tip
+ * @return
+ */
 Ihandle* create_button(char icon[], char tip[]) {
   Ihandle *btn = IupButton(NULL, NULL);
   IupSetAttribute(btn, "IMAGE", icon);
@@ -33,40 +46,6 @@ Ihandle* create_button(char icon[], char tip[]) {
   IupSetAttribute(btn, "CANFOCUS", "No");
   IupSetAttribute(btn, "TIP", tip);
   return btn;
-}
-
-
-void listDirectories(const char *basePath, const int root, const int depth, Ihandle *tree) {
-  struct dirent *entry;
-  DIR *dir = opendir(basePath);
-
-  if (dir == NULL) {
-    perror("Unable to open directory");
-    return;
-  }
-
-  while ((entry = readdir(dir)) != NULL) {
-    if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
-      continue;
-    }
-    char depthc[16];
-    char path[1024];
-    snprintf(path, sizeof(path), "%s/%s", basePath, entry->d_name);
-
-    printf("%s\n", path);
-    struct stat statbuf;
-    if (stat(path, &statbuf) == 0 && S_ISDIR(statbuf.st_mode)) {
-      sprintf(depthc, "ADDBRANCH%d", depth);
-      IupSetAttribute(tree, depthc,entry->d_name);
-      sprintf(depthc, "ADDLEAF%d", depth+1);
-      IupSetAttribute(tree, depthc,"<empty>");
-    } else {
-      sprintf(depthc, "ADDLEAF%d", depth);
-      IupSetAttribute(tree, depthc,entry->d_name);
-    }
-  }
-
-  closedir(dir);
 }
 
 int main(int argc, char **argv) {
@@ -243,6 +222,7 @@ int main(int argc, char **argv) {
   //Drzewo katalogów
   Ihandle *dir_list = IupTree();
   IupSetHandle("tree", dir_list);
+  IupSetCallback(dir_list, "BRANCHOPEN_CB", (Icallback)tree_node_open);
   IupSetAttribute(dir_list, "EXPAND", "VERTICAL");
   IupSetAttribute(dir_list, "ADDROOT", "FALSE");
 
@@ -286,7 +266,7 @@ int main(int argc, char **argv) {
   IupSetAttribute(dir_list, "ADDBRANCH-1","/");
   IupSetAttribute(dir_list, "ADDEXPANDED","NO");
   //TODO
-  listDirectories("C:\\", 0, 0, dir_list);
+  list_directories("C:/", 0, 0, dir_list);
   IupSetAttribute(dir_list, "STATE0","EXPANDED");
 
   IupMainLoop();
