@@ -20,7 +20,7 @@ void list_directories(const char *basePath, const int depth, Ihandle *tree) {
     DIR *dir = opendir(basePath);
     struct stat statbuf;
     if (dir == NULL) {
-        perror("Unable to open directory");
+        fprintf(stderr, "Unable to open directory %s: %s\n", basePath, strerror(errno));
         return;
     }
 
@@ -93,4 +93,13 @@ void delete_directory(const char* basePath) {
         printf("Successfully deleted directory of path: %s\n", basePath);
     } else {
         fprintf(stderr, "Could not delete directory of path %s: %s\n", basePath, strerror(errno));
-    }}
+    }
+}
+
+void rename_element(char* path, char* new_name) {
+    if (rename(path, new_name) == 0) {
+        printf("Successfully renamed %s to %s\n", path, new_name);
+    } else {
+        fprintf(stderr, "Could not rename %s to %s: %s\n", path, new_name, strerror(errno));
+    }
+}

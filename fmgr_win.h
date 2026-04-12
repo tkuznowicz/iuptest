@@ -12,4 +12,5 @@ void list_directories(const char *basePath, int depth, Ihandle *tree);
 void open_directory_sys(const char *path);
 void delete_file(const char *path);
 void delete_directory(const char *basePath);
+void rename_element(char *path, char *new_name);
 #endif //IUPTEST_FMGR_WIN_H

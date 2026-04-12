@@ -124,6 +124,66 @@ int popup_tree_leaf_delete_click(void) {
   return IUP_DEFAULT;
 }
 
+int popup_tree_node_rename_click(void) {
+  if (selected_node != -1) {
+    IupSetInt(IupGetHandle("tree"), "RENAME", selected_node);
+  } else {
+    fprintf(stderr, "Renaming element from right-click while no node selected.\n");
+  }
+  return IUP_DEFAULT;
+}
+
+void build_tree(void) {
+  Ihandle* dir_list = IupGetHandle("tree");
+  IupSetAttribute(dir_list, "DELNODE", "ALL");
+  IupSetAttribute(dir_list, "ADDBRANCH-1","D:\\");
+  IupTreeSetUserId(dir_list, IupGetInt(dir_list, "LASTADDNODE"),"D:\\");
+  IupSetAttribute(dir_list, "ADDEXPANDED","NO");
+  //TODO
+  list_directories("D:\\", 0, dir_list);
+  IupSetAttribute(dir_list, "STATE0","EXPANDED");
+}
+
+int action_refresh(void) {
+  build_tree();
+  return IUP_DEFAULT;
+}
+
+int tree_branch_renamed(Ihandle *tree, const int id, const char *new_title) {
+  char old_path[2048];
+  char new_path[2048];
+  const int parent = IupGetIntId(tree, "PARENT", id);
+  const char* parent_path = IupTreeGetUserId(tree, parent);
+  strcpy(old_path, parent_path);
+  strcat(old_path, SEPARATOR);
+  strcpy(new_path, old_path);
+  strcat(old_path, IupGetAttributeId(tree, "TITLE", id));
+  strcat(new_path, new_title);
+  rename_element(old_path, new_path);
+  reload_directory(parent);
+  return IUP_DEFAULT;
+}
+
+int tree_leaf_renamed(Ihandle *tree, const int id, const char *new_title) {
+  char old_path[2048];
+  char new_path[2048];
+  const int parent = IupGetIntId(tree, "PARENT", id);
+  const char* parent_path = IupTreeGetUserId(tree, parent);
+  strcpy(old_path, parent_path);
+  strcat(old_path, SEPARATOR);
+  strcpy(new_path, old_path);
+  strcat(old_path, IupGetAttributeId(tree, "TITLE", id));
+  strcat(new_path, new_title);
+  rename_element(old_path, new_path);
+  reload_directory(parent);
+  return IUP_DEFAULT;
+}
+
+int tree_node_renamed(Ihandle *tree, const int id, char *new_title) {
+  const int is_branch = strcmp(IupGetAttributeId(tree, "KIND", id), "LEAF");
+  return is_branch ? tree_branch_renamed(tree, id, new_title) : tree_leaf_renamed(tree, id, new_title);
+}
+
 /**
  * Funkcja pomocnicza do tworzenia przycisków
  * @param icon
@@ -189,6 +249,7 @@ int main(int argc, char **argv) {
   Ihandle *item_up = IupItem("Do góry", NULL);
   Ihandle *item_home = IupItem("Katalog domowy", NULL);
   Ihandle *item_refresh = IupItem("Odśwież", NULL);
+  IupSetCallback(item_refresh, "ACTION", (Icallback)action_refresh);
 
   Ihandle *nav_menu = IupMenu(item_back, item_forward, item_up, item_home, item_refresh, NULL);
   Ihandle *sub_menu_nav = IupSubmenu("Nawigacja", nav_menu);
@@ -235,6 +296,7 @@ int main(int argc, char **argv) {
   Ihandle *btn_up = create_button("IUP_ArrowUp", "Do góry");
   Ihandle *btn_home = create_button("IUP_NavigateHome", "Katalog domowy");
   Ihandle *btn_refresh = create_button("IUP_NavigateRefresh", "Odśwież");
+  IupSetCallback(btn_refresh, "ACTION", (Icallback)action_refresh);
   Ihandle *btn_cut = create_button("IUP_EditCut", "Wytnij...");
   Ihandle *btn_copy = create_button("IUP_EditCopy", "Kopiuj...");
   Ihandle *btn_paste = create_button("IUP_EditPaste", "Wklej...");
@@ -318,8 +380,10 @@ int main(int argc, char **argv) {
   IupSetCallback(dir_list, "BRANCHOPEN_CB", (Icallback)tree_branch_opened);
   IupSetCallback(dir_list, "EXECUTEBRANCH_CB", (Icallback)tree_branch_clicked);
   IupSetCallback(dir_list, "RIGHTCLICK_CB", (Icallback)tree_node_right_clicked);
+  IupSetCallback(dir_list, "RENAME_CB", (Icallback)tree_node_renamed);
   IupSetAttribute(dir_list, "EXPAND", "VERTICAL");
-  IupSetAttribute(dir_list, "ADDROOT", "FALSE");
+  IupSetAttribute(dir_list, "ADDROOT", "NO");
+  IupSetAttribute(dir_list, "SHOWRENAME", "YES");
 
 
   // Białe tło pod toolbarem
@@ -376,6 +440,7 @@ int main(int argc, char **argv) {
   IupSetCallback(popup_tree_branch_expand, "ACTION", (Icallback)popup_tree_branch_expand_click);
   IupSetCallback(popup_tree_branch_collapse, "ACTION", (Icallback)popup_tree_branch_collapse_click);
   IupSetCallback(popup_tree_branch_delete, "ACTION", (Icallback)popup_tree_branch_delete_click);
+  IupSetCallback(popup_tree_branch_rename, "ACTION", (Icallback)popup_tree_node_rename_click);
 
 
   //
@@ -393,6 +458,7 @@ int main(int argc, char **argv) {
     NULL);
   IupSetHandle("popup_tree_leaf", popup_tree_leaf);
   IupSetCallback(popup_tree_leaf_delete, "ACTION", (Icallback)popup_tree_leaf_delete_click);
+  IupSetCallback(popup_tree_leaf_rename, "ACTION", (Icallback)popup_tree_node_rename_click);
 
 
 
@@ -412,11 +478,7 @@ int main(int argc, char **argv) {
   //Rozmiar okna
   IupSetAttribute(dlg, "USERSIZE", NULL);
 
-  IupSetAttribute(dir_list, "ADDBRANCH-1","/");
-  IupSetAttribute(dir_list, "ADDEXPANDED","NO");
-  //TODO
-  list_directories("Z:\\", 0, dir_list);
-  IupSetAttribute(dir_list, "STATE0","EXPANDED");
+  build_tree();
 
   IupMainLoop();
 
