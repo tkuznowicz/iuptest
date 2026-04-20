@@ -108,7 +108,7 @@ int popup_tree_branch_delete_click(void) {
 int popup_tree_leaf_delete_click(void) {
   if (selected_node != -1) {
     Ihandle *tree = IupGetHandle("tree");
-    //Scieżka do folderu (rodzica)
+    //Ścieżka do folderu (rodzica)
     char file_path[2048];
     const int parent = IupGetIntId(tree, "PARENT", selected_node);
     const char* parent_path = IupTreeGetUserId(tree, parent);
@@ -176,7 +176,7 @@ int tree_leaf_renamed(Ihandle *tree, const int id, const char *new_title) {
   return IUP_DEFAULT;
 }
 
-int tree_node_renamed(Ihandle *tree, const int id, char *new_title) {
+int tree_node_renamed(Ihandle *tree, const int id, const char *new_title) {
   const int is_branch = strcmp(IupGetAttributeId(tree, "KIND", id), "LEAF");
   return is_branch ? tree_branch_renamed(tree, id, new_title) : tree_leaf_renamed(tree, id, new_title);
 }
@@ -197,7 +197,7 @@ Ihandle* create_button(char icon[], char tip[]) {
 }
 
 int main(int argc, char **argv) {
-  //Inicjalizacja Iup i IupImgLib (do ikon)
+  //Inicjalizacja Iup i iupimglib (do ikon)
   IupOpen(&argc, &argv);
   IupImageLibOpen();
 
@@ -205,8 +205,8 @@ int main(int argc, char **argv) {
 
   // 1.1 Plik
   //Elementy menu Plik
-  //W ogóle z jakiegoś powodu windows nie obsługuje polskich znaków w tych gui, dopóki nie zmienisz encodingu z utf8 na win1250 xd
-  //temu się trzeba przyjrzeć i ogarnąć to jakoś
+  //W ogóle z jakiegoś powodu windows nie obsługuje polskich znaków w tych gui, dopóki nie zmienisz kodowania z utf8 na win1250.
+  //Temu się trzeba przyjrzeć i ogarnąć to jakoś
   Ihandle *item_settings = IupItem("Ustawienia", NULL);
   Ihandle *item_exit = IupItem("Wyjdź", NULL);
 
@@ -307,7 +307,7 @@ int main(int argc, char **argv) {
   Ihandle *btn_settings = create_button("IUP_ToolsSettings", "Ustawienia");
   Ihandle *btn_help = create_button("IUP_MessageHelp", "Pomoc");
 
-  //Sam Toolbar (hbox - horizontal box)
+  //Sam Toolbar (hbox — horizontal box)
   Ihandle *toolbar_hb = IupHbox(
     btn_left,
     btn_right,
@@ -405,7 +405,7 @@ int main(int argc, char **argv) {
     file_list,
     NULL);
 
-  //Kontener z zawartością okna (Vbox - vertical box)
+  //Kontener z zawartością okna (Vbox — vertical box)
   Ihandle *vbox = IupVbox(
     toolbar_hb,
     address_bar_container,
@@ -414,7 +414,7 @@ int main(int argc, char **argv) {
     NULL);
 
 
-  //TEST - menu do drzewa katalogow
+  //TEST — menu do drzewa katalogow
   Ihandle *popup_tree_branch_expand = IupItem("Rozwiń", NULL);
   Ihandle *popup_tree_branch_collapse = IupItem("Zwiń", NULL);
   Ihandle *popup_tree_branch_open = IupItem("Otwórz katalog", NULL);
