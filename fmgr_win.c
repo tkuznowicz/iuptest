@@ -11,8 +11,37 @@
 
 char SEPARATOR[1] = {'\\'};
 
-void list_drives(void) {
+void list_drives(Ihandle *tree) {
 
+    IupSetAttribute(tree, "DELNODE", "ALL");
+    IupSetAttribute(tree, "ADDBRANCH-1","Komputer");
+    IupTreeSetUserId(tree, IupGetInt(tree, "LASTADDNODE"),"!");
+    IupSetAttribute(tree, "ADDEXPANDED","NO");
+
+
+    wchar_t LogicalDrives[MAX_PATH] = {0};
+    const DWORD r = GetLogicalDriveStringsW(MAX_PATH, LogicalDrives);
+
+    if (r == 0) {
+        fprintf(stderr, "Unable to list drives.");
+        return;
+    }
+
+    if (r <= MAX_PATH) {
+        wchar_t *SingleDrive = LogicalDrives;
+
+        while (*SingleDrive) {
+            char* drive_str = malloc(8);
+            wcstombs(drive_str, SingleDrive, 8);
+
+            IupSetAttribute(tree, "ADDBRANCH",drive_str);
+            IupTreeSetUserId(tree, IupGetInt(tree, "LASTADDNODE"), drive_str);
+            IupSetAttribute(tree, "ADDEXPANDED","NO");
+
+            list_directories(drive_str, 1, tree);
+            SingleDrive += wcslen(SingleDrive) + 1;
+        }
+    }
 }
 
 void list_directories(const char *basePath, const int depth, Ihandle *tree) {

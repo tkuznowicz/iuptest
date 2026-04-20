@@ -44,7 +44,6 @@ int tree_branch_opened(Ihandle *tree, const int id) {
 }
 
 int tree_branch_clicked(Ihandle *tree, const int id) {
-  // IupSetAttributeId(tree, "TITLEFONTSTYLE", id, "Bold");
   IupSetAttribute(IupGetHandle("address_bar"), "VALUE", IupTreeGetUserId(tree, id));
   return IUP_DEFAULT;
 }
@@ -135,12 +134,10 @@ int popup_tree_node_rename_click(void) {
 
 void build_tree(void) {
   Ihandle* dir_list = IupGetHandle("tree");
-  IupSetAttribute(dir_list, "DELNODE", "ALL");
-  IupSetAttribute(dir_list, "ADDBRANCH-1","D:\\");
-  IupTreeSetUserId(dir_list, IupGetInt(dir_list, "LASTADDNODE"),"D:\\");
-  IupSetAttribute(dir_list, "ADDEXPANDED","NO");
-  //TODO
-  list_directories("D:\\", 0, dir_list);
+
+  //Listowanie wszystkich dysków
+  list_drives(dir_list);
+
   IupSetAttribute(dir_list, "STATE0","EXPANDED");
 }
 
