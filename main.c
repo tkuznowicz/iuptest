@@ -30,10 +30,20 @@ int item_about_click(void) {
 
 void reload_directory(const int id) {
   Ihandle *tree = IupGetHandle("tree");
-  //Usuwamy placeholder
-  IupSetAttributeId(tree, "DELNODE", id, "CHILDREN");
-  //Dodajemy podkatalogi
-  list_directories(IupTreeGetUserId(tree, id), id, tree);
+  //Poprawka na reloadowanie głównego folderu
+  const char *basePath = IupTreeGetUserId(tree, id);
+
+  if (strcmp(basePath, "!") == 0) {
+    //Usuwamy całe drzewo
+    IupSetAttributeId(tree, "DELNODE", id, "ALL");
+    //Budujemy od nowa listę dysków
+    list_drives(tree);
+  } else {
+    //Usuwamy placeholder
+    IupSetAttributeId(tree, "DELNODE", id, "CHILDREN");
+    //Dodajemy podkatalogi
+    list_directories(basePath, id, tree);
+  }
   IupSetAttributeId(tree, "STATE", id, "EXPANDED");
 }
 
@@ -381,6 +391,8 @@ int main(int argc, char **argv) {
   IupSetAttribute(dir_list, "EXPAND", "VERTICAL");
   IupSetAttribute(dir_list, "ADDROOT", "NO");
   IupSetAttribute(dir_list, "SHOWRENAME", "YES");
+  //Ikona plikow
+  IupSetAttribute(dir_list, "IMAGELEAF", "IMGPAPER");
 
 
   // Białe tło pod toolbarem

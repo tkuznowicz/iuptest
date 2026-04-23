@@ -18,7 +18,6 @@ void list_drives(Ihandle *tree) {
     IupTreeSetUserId(tree, IupGetInt(tree, "LASTADDNODE"),"!");
     IupSetAttribute(tree, "ADDEXPANDED","NO");
 
-
     wchar_t LogicalDrives[MAX_PATH] = {0};
     const DWORD r = GetLogicalDriveStringsW(MAX_PATH, LogicalDrives);
 
