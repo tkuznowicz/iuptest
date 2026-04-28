@@ -9,14 +9,19 @@
 #include <stdio.h>
 #include <windows.h>
 
+//Windowsowy separator do katalogĂłw
 char SEPARATOR[1] = {'\\'};
 
+//Funkcja do listowania drzewa od korzenia, w Windowsie to jest listowanie wszystkich dyskĂłw
 void list_drives(Ihandle *tree) {
-
+    //Usuwamy caĹ‚e drzewo
     IupSetAttribute(tree, "DELNODE", "ALL");
+    //Dodajemy korzeĹ„
     IupSetAttribute(tree, "ADDBRANCH-1","Komputer");
+    //Specjalny atrybut, jako ĹĽe korzeĹ„ to nie katalog i nie moĹĽna na nim wykonywaÄ‡ niektĂłrych operacji
     IupTreeSetUserId(tree, IupGetInt(tree, "LASTADDNODE"),"!");
     IupSetAttribute(tree, "ADDEXPANDED","NO");
+
 
     wchar_t LogicalDrives[MAX_PATH] = {0};
     const DWORD r = GetLogicalDriveStringsW(MAX_PATH, LogicalDrives);
@@ -45,6 +50,7 @@ void list_drives(Ihandle *tree) {
 
 void list_directories(const char *basePath, const int depth, Ihandle *tree) {
     struct dirent *entry;
+    //Otwieramy katalog
     DIR *dir = opendir(basePath);
     struct stat statbuf;
     if (dir == NULL) {
@@ -52,6 +58,7 @@ void list_directories(const char *basePath, const int depth, Ihandle *tree) {
         return;
     }
 
+    //Wczytujemy wszystkie pliki
     while ((entry = readdir(dir)) != NULL) {
         if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
             continue;
@@ -97,7 +104,7 @@ void delete_directory(const char* basePath) {
     DIR *dir = opendir(basePath);
     struct stat statbuf;
     if (dir == NULL) {
-        perror("Unable to open directory");
+        fprintf(stderr, "Unable to open directory %s: %s\n", basePath, strerror(errno));
         return;
     }
 

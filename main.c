@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <iup.h>
 #include <string.h>
+#include <windows.h>
 #include "fmgr_win.h"
 
 char current_path[1024] = "";
@@ -34,8 +35,6 @@ void reload_directory(const int id) {
   const char *basePath = IupTreeGetUserId(tree, id);
 
   if (strcmp(basePath, "!") == 0) {
-    //Usuwamy całe drzewo
-    IupSetAttributeId(tree, "DELNODE", id, "ALL");
     //Budujemy od nowa listę dysków
     list_drives(tree);
   } else {

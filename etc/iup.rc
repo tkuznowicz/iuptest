@@ -1,8 +1,10 @@
-PENIS BITMAP "penis.bmp"
-
 TECGRAF_ICON ICON "tecgraf.ico"
 CURSOR_PEN CURSOR "pen.cur"
+COMPUTER BITMAP "computer.bmp"
+DISK BITMAP "disk.bmp"
 
+COMPUTER_ICON ICON "computerico.ico"
+DISK_ICON ICON "diskico.ico"
 
 1 VERSIONINFO
  FILEVERSION 1,0,0,0
