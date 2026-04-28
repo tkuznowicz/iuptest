@@ -2,7 +2,6 @@
 // Created by TmkTmk on 10.04.2026.
 //
 #include "fmgr_win.h"
-#include "fmgr.h"
 #include <iup.h>
 #include <string.h>
 #include <dirent.h>
@@ -20,13 +19,10 @@ void list_drives(Ihandle *tree) {
     //Dodajemy korzeĹ„
     IupSetAttribute(tree, "ADDBRANCH-1","Komputer");
     //Specjalny atrybut, jako ĹĽe korzeĹ„ to nie katalog i nie moĹĽna na nim wykonywaÄ‡ niektĂłrych operacji
+    tree_element *main = create_tree_element(NULL, 1, 1, "", "!");
 
-    int added_id = IupGetInt(tree, "LASTADDNODE");
-    struct tree_element main = { 1, 1, "", ""};
-
-    IupTreeSetUserId(tree, added_id, &main);
+    IupTreeSetUserId(tree, IupGetInt(tree, "LASTADDNODE"), main);
     IupSetAttribute(tree, "ADDEXPANDED","NO");
-
 
     wchar_t LogicalDrives[MAX_PATH] = {0};
     const DWORD r = GetLogicalDriveStringsW(MAX_PATH, LogicalDrives);
@@ -45,18 +41,17 @@ void list_drives(Ihandle *tree) {
 
             IupSetAttribute(tree, "ADDBRANCH",drive_str);
 
-            int last_added = IupGetInt(tree, "LASTADDNODE");
-            struct tree_element drive = {last_added, 1, 1, .name = *drive_str, .path = *drive_str};
-            IupTreeSetUserId(tree, last_added, &drive);
+            tree_element *drive = create_tree_element(main, 1, 1, drive_str, drive_str);
+            IupTreeSetUserId(tree, IupGetInt(tree, "LASTADDNODE"), drive);
             IupSetAttribute(tree, "ADDEXPANDED","NO");
 
-            list_directories(drive_str, 1, tree);
+            list_directories(drive_str, 1, drive, tree);
             SingleDrive += wcslen(SingleDrive) + 1;
         }
     }
 }
 
-void list_directories(const char *basePath, const int depth, Ihandle *tree) {
+void list_directories(const char *basePath, const int depth, tree_element *parent, Ihandle *tree) {
     struct dirent *entry;
     //Otwieramy katalog
     DIR *dir = opendir(basePath);
@@ -71,7 +66,7 @@ void list_directories(const char *basePath, const int depth, Ihandle *tree) {
         if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
             continue;
         }
-        char *path = malloc(1025);
+        char *path = malloc(32769);
 
         //Formatujemy nowÄ… Ĺ›cieĹĽkÄ™
         snprintf(path, 1024, "%s%s%s", basePath, SEPARATOR, entry->d_name);
@@ -80,16 +75,18 @@ void list_directories(const char *basePath, const int depth, Ihandle *tree) {
             //Dodajemy nowÄ… gaĹ‚Ä…Ĺş (katalog)
             IupSetAttributeId(tree, "ADDBRANCH", depth, entry->d_name);
             //Ustawiamy Ĺ›cieĹĽkÄ™ katalogu jako jego id
+            tree_element *directory = create_tree_element(parent, 1, 0, entry->d_name, path);
 
-            int added_node_id = IupGetInt(tree, "LASTADDNODE");
+            fprintf(stdout, "Creating branch of %s, %s, %s\n", directory->path, directory->name, path);
 
-            struct tree_element drive = {.is_directory = 1, .is_special = 1, .name = *entry->d_name, .path = *path};
-            IupTreeSetUserId(tree, added_node_id, &drive);
+            IupTreeSetUserId(tree, IupGetInt(tree, "LASTADDNODE"), directory);
             //Placeholder, ĹĽeby gaĹ‚Ä…Ĺş mogĹ‚a siÄ™ rozwinÄ…Ä‡
             IupSetAttributeId(tree, "ADDLEAF", IupGetInt(tree, "LASTADDNODE"), "<empty>");
         } else {
             //Dodajemy liĹ›Ä‡ (plik)
             IupSetAttributeId(tree, "ADDLEAF", depth, entry->d_name);
+            tree_element *file = create_tree_element(parent, 0, 0, entry->d_name, path);
+            IupTreeSetUserId(tree,  IupGetInt(tree, "LASTADDNODE"), file);
         }
     }
     closedir(dir);
@@ -143,7 +140,7 @@ void delete_directory(const char* basePath) {
     }
 }
 
-void rename_element(char* path, char* new_name) {
+void rename_element(const char* path, char* new_name) {
     if (rename(path, new_name) == 0) {
         printf("Successfully renamed %s to %s\n", path, new_name);
     } else {
