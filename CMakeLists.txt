@@ -10,5 +10,7 @@ link_libraries(iup iupimglib)
 
 add_executable(iuptest main.c etc/iup.rc
         fmgr_win.c
-        fmgr_win.h)
+        fmgr_win.h
+        fmgr.c
+        fmgr.h)
 target_link_libraries(iuptest iup iupimglib)

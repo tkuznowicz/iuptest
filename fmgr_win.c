@@ -2,6 +2,7 @@
 // Created by TmkTmk on 10.04.2026.
 //
 #include "fmgr_win.h"
+#include "fmgr.h"
 #include <iup.h>
 #include <string.h>
 #include <dirent.h>
@@ -19,7 +20,11 @@ void list_drives(Ihandle *tree) {
     //Dodajemy korzeĹ„
     IupSetAttribute(tree, "ADDBRANCH-1","Komputer");
     //Specjalny atrybut, jako ĹĽe korzeĹ„ to nie katalog i nie moĹĽna na nim wykonywaÄ‡ niektĂłrych operacji
-    IupTreeSetUserId(tree, IupGetInt(tree, "LASTADDNODE"),"!");
+
+    int added_id = IupGetInt(tree, "LASTADDNODE");
+    struct tree_element main = { 1, 1, "", ""};
+
+    IupTreeSetUserId(tree, added_id, &main);
     IupSetAttribute(tree, "ADDEXPANDED","NO");
 
 
@@ -39,7 +44,10 @@ void list_drives(Ihandle *tree) {
             wcstombs(drive_str, SingleDrive, 8);
 
             IupSetAttribute(tree, "ADDBRANCH",drive_str);
-            IupTreeSetUserId(tree, IupGetInt(tree, "LASTADDNODE"), drive_str);
+
+            int last_added = IupGetInt(tree, "LASTADDNODE");
+            struct tree_element drive = {last_added, 1, 1, .name = *drive_str, .path = *drive_str};
+            IupTreeSetUserId(tree, last_added, &drive);
             IupSetAttribute(tree, "ADDEXPANDED","NO");
 
             list_directories(drive_str, 1, tree);
@@ -72,7 +80,11 @@ void list_directories(const char *basePath, const int depth, Ihandle *tree) {
             //Dodajemy nowÄ… gaĹ‚Ä…Ĺş (katalog)
             IupSetAttributeId(tree, "ADDBRANCH", depth, entry->d_name);
             //Ustawiamy Ĺ›cieĹĽkÄ™ katalogu jako jego id
-            IupTreeSetUserId(tree, IupGetInt(tree, "LASTADDNODE"), path);
+
+            int added_node_id = IupGetInt(tree, "LASTADDNODE");
+
+            struct tree_element drive = {.is_directory = 1, .is_special = 1, .name = *entry->d_name, .path = *path};
+            IupTreeSetUserId(tree, added_node_id, &drive);
             //Placeholder, ĹĽeby gaĹ‚Ä…Ĺş mogĹ‚a siÄ™ rozwinÄ…Ä‡
             IupSetAttributeId(tree, "ADDLEAF", IupGetInt(tree, "LASTADDNODE"), "<empty>");
         } else {
