@@ -12,7 +12,6 @@
 char current_path[1024] = "";
 tree_element *selected_node = NULL;
 
-
 /**
  * Funkcja obsługująca kliknięcie "Wyjdź" z menu "Plik"
  **/
@@ -102,26 +101,21 @@ int tree_branch_clicked(Ihandle *tree, const int id) {
   return IUP_DEFAULT;
 }
 
-int tree_branch_right_clicked(Ihandle *tree, const int id) {
-  int is_root = strcmp(selected_node->path, "!") == 0;
-  int is_special = is_root || selected_node->is_special;
-  IupSetAttribute(IupGetHandle("popup_tree_branch_open"), "ACTIVE", is_root?"NO":"YES");
-  IupSetAttribute(IupGetHandle("popup_tree_branch_rename"), "ACTIVE", is_special?"NO":"YES");
-  IupSetAttribute(IupGetHandle("popup_tree_branch_delete"), "ACTIVE", is_special?"NO":"YES");
-  IupPopup(IupGetHandle("popup_tree_branch"), IUP_MOUSEPOS, IUP_MOUSEPOS);
-  return IUP_DEFAULT;
-}
-
-int tree_leaf_right_clicked(Ihandle *tree, const int id) {
-  IupPopup(IupGetHandle("popup_tree_leaf"), IUP_MOUSEPOS, IUP_MOUSEPOS);
-  return IUP_DEFAULT;
-}
-
 int tree_node_right_clicked(Ihandle *tree, const int id) {
-  const int is_branch = strcmp(IupGetAttributeId(tree, "KIND", id), "LEAF");
   IupSetAttributeId(tree, "MARKED", id, "YES");
   selected_node = IupTreeGetUserId(tree, id);
-  return is_branch ? tree_branch_right_clicked(tree, id) : tree_leaf_right_clicked(tree, id);
+
+  if (selected_node->is_directory) {
+    const int is_root = strcmp(selected_node->path, "!") == 0;
+    const int is_special = is_root || selected_node->is_special;
+    IupSetAttribute(IupGetHandle("popup_tree_branch_open"), "ACTIVE", is_root?"NO":"YES");
+    IupSetAttribute(IupGetHandle("popup_tree_branch_rename"), "ACTIVE", is_special?"NO":"YES");
+    IupSetAttribute(IupGetHandle("popup_tree_branch_delete"), "ACTIVE", is_special?"NO":"YES");
+    IupPopup(IupGetHandle("popup_tree_branch"), IUP_MOUSEPOS, IUP_MOUSEPOS);
+  } else {
+    IupPopup(IupGetHandle("popup_tree_leaf"), IUP_MOUSEPOS, IUP_MOUSEPOS);
+  }
+  return IUP_DEFAULT;
 }
 
 int popup_tree_branch_open_click(void) {

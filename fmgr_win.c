@@ -21,7 +21,12 @@ void list_drives(Ihandle *tree) {
     //Specjalny atrybut, jako ĹĽe korzeĹ„ to nie katalog i nie moĹĽna na nim wykonywaÄ‡ niektĂłrych operacji
     tree_element *main = create_tree_element(NULL, 1, 1, "", "!");
 
-    IupTreeSetUserId(tree, IupGetInt(tree, "LASTADDNODE"), main);
+    const int last_added_id = IupGetInt(tree, "LASTADDNODE");
+    IupTreeSetUserId(tree, last_added_id, main);
+
+    //Ikona korzenia
+    IupSetAttributeId(tree, "IMAGE", last_added_id, "COMPUTER");
+    IupSetAttributeId(tree, "IMAGEEXPANDED", last_added_id, "COMPUTER");
     IupSetAttribute(tree, "ADDEXPANDED","NO");
 
     wchar_t LogicalDrives[MAX_PATH] = {0};
@@ -42,7 +47,11 @@ void list_drives(Ihandle *tree) {
             IupSetAttribute(tree, "ADDBRANCH",drive_str);
 
             tree_element *drive = create_tree_element(main, 1, 1, drive_str, drive_str);
-            IupTreeSetUserId(tree, IupGetInt(tree, "LASTADDNODE"), drive);
+            int last_added = IupGetInt(tree, "LASTADDNODE");
+            IupTreeSetUserId(tree, last_added, drive);
+            //Ikona dysku
+            IupSetAttributeId(tree, "IMAGE", last_added, "DISK");
+            IupSetAttributeId(tree, "IMAGEEXPANDED", last_added, "DISK");
             IupSetAttribute(tree, "ADDEXPANDED","NO");
 
             list_directories(drive_str, 1, drive, tree);
