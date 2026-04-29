@@ -103,6 +103,11 @@ int tree_branch_clicked(Ihandle *tree, const int id) {
 }
 
 int tree_branch_right_clicked(Ihandle *tree, const int id) {
+  int is_root = strcmp(selected_node->path, "!") == 0;
+  int is_special = is_root || selected_node->is_special;
+  IupSetAttribute(IupGetHandle("popup_tree_branch_open"), "ACTIVE", is_root?"NO":"YES");
+  IupSetAttribute(IupGetHandle("popup_tree_branch_rename"), "ACTIVE", is_special?"NO":"YES");
+  IupSetAttribute(IupGetHandle("popup_tree_branch_delete"), "ACTIVE", is_special?"NO":"YES");
   IupPopup(IupGetHandle("popup_tree_branch"), IUP_MOUSEPOS, IUP_MOUSEPOS);
   return IUP_DEFAULT;
 }
@@ -196,7 +201,8 @@ int action_refresh(void) {
   return IUP_DEFAULT;
 }
 
-int tree_element_renamed(const tree_element *branch, const char *new_title) {
+int tree_node_renamed(Ihandle *tree, const int id, const char *new_title) {
+  tree_element *branch = IupTreeGetUserId(tree, id);
   const char *old_path = branch->path;
 
   tree_element *parent = branch->parent;
@@ -209,13 +215,7 @@ int tree_element_renamed(const tree_element *branch, const char *new_title) {
 
   rename_element(old_path, new_path);
   reload_directory(parent);
-  return IUP_DEFAULT;
-}
-
-
-int tree_node_renamed(Ihandle *tree, const int id, const char *new_title) {
-  return tree_element_renamed(IupTreeGetUserId(tree, id), new_title);
-}
+  return IUP_DEFAULT;}
 
 /**
  * Funkcja pomocnicza do tworzenia przycisków
@@ -421,6 +421,8 @@ int main(int argc, char **argv) {
   IupSetAttribute(dir_list, "IMAGELEAF", "IMGPAPER");
 
 
+
+
   // Białe tło pod toolbarem
   Ihandle *frame = IupBackgroundBox(NULL);
   IupSetAttribute(frame, "BGCOLOR", "255 255 255");
@@ -452,13 +454,17 @@ int main(int argc, char **argv) {
     NULL);
 
 
-  //TEST — menu do drzewa katalogow
+  //Menu kontekstowe przy prawym kliknieciu katalogu w drzewie katalogu
   Ihandle *popup_tree_branch_expand = IupItem("Rozwiń", NULL);
   Ihandle *popup_tree_branch_collapse = IupItem("Zwiń", NULL);
   Ihandle *popup_tree_branch_open = IupItem("Otwórz katalog", NULL);
   Ihandle *popup_tree_branch_rename = IupItem("Zmień nazwę", NULL);
   Ihandle *popup_tree_branch_delete = IupItem("Usuń", NULL);
   Ihandle *popup_tree_branch_properties = IupItem("Właściwości", NULL);
+
+  IupSetHandle("popup_tree_branch_open", popup_tree_branch_open);
+  IupSetHandle("popup_tree_branch_rename", popup_tree_branch_rename);
+  IupSetHandle("popup_tree_branch_delete", popup_tree_branch_delete);
 
   Ihandle *popup_tree_branch = IupMenu(
     popup_tree_branch_expand,
@@ -479,7 +485,7 @@ int main(int argc, char **argv) {
   IupSetCallback(popup_tree_branch_properties, "ACTION", (Icallback)open_dialog_properties);
 
 
-  //
+  //Menu kontekstowe przy prawym kliknieciu pliku w drzewie katalogu
   Ihandle *popup_tree_leaf_open = IupItem("Otwórz plik", NULL);
   Ihandle *popup_tree_leaf_rename = IupItem("Zmień nazwę", NULL);
   Ihandle *popup_tree_leaf_cut = IupItem("Wytnij", NULL);

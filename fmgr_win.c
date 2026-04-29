@@ -77,7 +77,8 @@ void list_directories(const char *basePath, const int depth, tree_element *paren
             //Ustawiamy Ĺ›cieĹĽkÄ™ katalogu jako jego id
             tree_element *directory = create_tree_element(parent, 1, 0, entry->d_name, path);
 
-            fprintf(stdout, "Creating branch of %s, %s, %s\n", directory->path, directory->name, path);
+            //dbg
+            // fprintf(stdout, "Creating branch of %s, %s, %s\n", directory->path, directory->name, path);
 
             IupTreeSetUserId(tree, IupGetInt(tree, "LASTADDNODE"), directory);
             //Placeholder, ĹĽeby gaĹ‚Ä…Ĺş mogĹ‚a siÄ™ rozwinÄ…Ä‡

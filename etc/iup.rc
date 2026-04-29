@@ -1,6 +1,12 @@
 TECGRAF_ICON ICON "tecgraf.ico"
 CURSOR_PEN CURSOR "pen.cur"
 
+COMPUTER BITMAP "computer.bmp"
+DISK BITMAP "disk.bmp"
+COMPUTERT BITMAP "computer_transparent.bmp"
+DISKT BITMAP "disk_transparent.bmp"
+COMPUTERI ICON "computer_icon.ico"
+DISKI ICON "disk_icon.ico"
 
 1 VERSIONINFO
  FILEVERSION 1,0,0,0
