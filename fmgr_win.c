@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <stdio.h>
 #include <windows.h>
+#include <winbase.h>
 
 //Windowsowy separator do katalogĂłw
 char SEPARATOR[1] = {'\\'};
@@ -116,6 +117,46 @@ void delete_file(const char* path) {
     } else {
         fprintf(stderr, "Could not delete file of path %s: %s\n", path, strerror(errno));
     }
+}
+
+void properties(const char* path)
+{
+    WIN32_FILE_ATTRIBUTE_DATA *attr = malloc(sizeof(WIN32_FILE_ATTRIBUTE_DATA));
+    GetFileAttributesEx(path, GetFileExInfoStandard, attr);
+
+    SYSTEMTIME *time = malloc(sizeof(SYSTEMTIME));
+
+    //Creation time
+    FileTimeToSystemTime(&attr->ftCreationTime, time);
+
+    char *date_c = malloc(64);
+    snprintf(date_c, 1024, "%hu:%hu:%hu %hu-%hu-%hu", time->wHour, time->wMinute, time->wSecond, time->wYear, time->wMonth, time->wDay);
+    IupSetAttribute(IupGetHandle("prop_date_created"), "TITLE", date_c);
+
+    //Modification time
+    FileTimeToSystemTime(&attr->ftLastWriteTime, time);
+
+    char *date_m = malloc(64);
+    snprintf(date_m, 1024, "%hu:%hu:%hu %hu-%hu-%hu", time->wHour, time->wMinute, time->wSecond, time->wYear, time->wMonth, time->wDay);
+    IupSetAttribute(IupGetHandle("prop_date_modified"), "TITLE", date_m);
+
+    //Last access time
+    FileTimeToSystemTime(&attr->ftLastAccessTime, time);
+
+    char *date_a = malloc(64);
+    snprintf(date_a, 1024, "%hu:%hu:%hu %hu-%hu-%hu", time->wHour, time->wMinute, time->wSecond, time->wYear, time->wMonth, time->wDay);
+    IupSetAttribute(IupGetHandle("prop_date_last_accessed"), "TITLE", date_a);
+
+
+    //Size
+    char *l = malloc(sizeof(long long));
+    ULONGLONG file_size = ((ULONGLONG)(attr->nFileSizeHigh) <<
+                      sizeof(attr->nFileSizeLow) *8) |
+                     attr->nFileSizeLow;
+    snprintf(l, sizeof(long long), "%llu", file_size);
+
+    IupSetAttribute(IupGetHandle("prop_size"), "TITLE", l);
+
 }
 
 void delete_directory(const char* basePath) {
