@@ -130,33 +130,35 @@ void properties(const char* path)
     FileTimeToSystemTime(&attr->ftCreationTime, time);
 
     char *date_c = malloc(64);
-    snprintf(date_c, 1024, "%hu:%hu:%hu %hu-%hu-%hu", time->wHour, time->wMinute, time->wSecond, time->wYear, time->wMonth, time->wDay);
+    snprintf(date_c, 1024, "%02hu:%02hu:%02hu %04hu-%02hu-%02hu", time->wHour, time->wMinute, time->wSecond, time->wYear, time->wMonth, time->wDay);
     IupSetAttribute(IupGetHandle("prop_date_created"), "TITLE", date_c);
 
     //Modification time
     FileTimeToSystemTime(&attr->ftLastWriteTime, time);
 
     char *date_m = malloc(64);
-    snprintf(date_m, 1024, "%hu:%hu:%hu %hu-%hu-%hu", time->wHour, time->wMinute, time->wSecond, time->wYear, time->wMonth, time->wDay);
+    snprintf(date_m, 1024, "%02hu:%02hu:%02hu %04hu-%02hu-%02hu", time->wHour, time->wMinute, time->wSecond, time->wYear, time->wMonth, time->wDay);
     IupSetAttribute(IupGetHandle("prop_date_modified"), "TITLE", date_m);
 
     //Last access time
     FileTimeToSystemTime(&attr->ftLastAccessTime, time);
 
     char *date_a = malloc(64);
-    snprintf(date_a, 1024, "%hu:%hu:%hu %hu-%hu-%hu", time->wHour, time->wMinute, time->wSecond, time->wYear, time->wMonth, time->wDay);
+    snprintf(date_a, 1024, "%02hu:%02hu:%02hu %04hu-%02hu-%02hu", time->wHour, time->wMinute, time->wSecond, time->wYear, time->wMonth, time->wDay);
     IupSetAttribute(IupGetHandle("prop_date_last_accessed"), "TITLE", date_a);
 
 
     //Size
     char *l = malloc(sizeof(long long));
-    ULONGLONG file_size = ((ULONGLONG)(attr->nFileSizeHigh) <<
-                      sizeof(attr->nFileSizeLow) *8) |
+    const ULONGLONG file_size = (ULONGLONG)attr->nFileSizeHigh <<
+                      sizeof(attr->nFileSizeLow) *8 |
                      attr->nFileSizeLow;
     snprintf(l, sizeof(long long), "%llu", file_size);
 
     IupSetAttribute(IupGetHandle("prop_size"), "TITLE", l);
 
+    free(attr);
+    free(time);
 }
 
 void delete_directory(const char* basePath) {

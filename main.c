@@ -77,6 +77,7 @@ void open_dialog_cut(void) {
   IupSetAttribute(vbox, "GAP", "5");
 
   Ihandle *dialog = IupDialog(vbox);
+  IupSetAttribute(dialog, "RESIZE", "NO");
   IupSetAttribute(dialog, "TITLE", "Wycinanie");
   IupSetAttributeHandle(dialog, "DEFAULTESC", quit_bt);
   IupShow(dialog);
@@ -86,32 +87,32 @@ void open_dialog_properties(void) {
   Ihandle *label_name = IupLabel("Nazwa pliku: ");
   Ihandle *val_name = IupLabel(selected_node->name);
 
-  Ihandle *box_name = IupHbox(label_name, val_name, NULL);
+  // Ihandle *box_name = IupHbox(label_name, val_name, NULL);
 
   Ihandle *label_path = IupLabel("Ścieżka: ");
   Ihandle *val_path = IupLabel(selected_node->path);
 
-  Ihandle *box_path = IupHbox(label_path, val_path, NULL);
+  // Ihandle *box_path = IupHbox(label_path, val_path, NULL);
 
   Ihandle *label_date_created = IupLabel("Data utworzenia: ");
   Ihandle *val_date_created = IupLabel("");
 
-  Ihandle *box_date_created = IupHbox(label_date_created, val_date_created, NULL);
+  // Ihandle *box_date_created = IupHbox(label_date_created, val_date_created, NULL);
 
   Ihandle *label_date_modified = IupLabel("Data modyfikacji: ");
   Ihandle *val_date_modified = IupLabel("");
 
-  Ihandle *box_date_modified = IupHbox(label_date_modified, val_date_modified, NULL);
+  // Ihandle *box_date_modified = IupHbox(label_date_modified, val_date_modified, NULL);
 
   Ihandle *label_date_last_used = IupLabel("Data ostatniego użycia: ");
   Ihandle *val_date_last_used = IupLabel("");
 
-  Ihandle *box_date_last_used = IupHbox(label_date_last_used, val_date_last_used, NULL);
+  // Ihandle *box_date_last_used = IupHbox(label_date_last_used, val_date_last_used, NULL);
 
   Ihandle *label_size = IupLabel("Rozmiar: ");
   Ihandle *val_size = IupLabel("");
 
-  Ihandle *box_size = IupHbox(label_size, val_size, NULL);
+  // Ihandle *box_size = IupHbox(label_size, val_size, NULL);
 
   IupSetHandle("prop_date_created", val_date_created);
   IupSetHandle("prop_date_modified", val_date_modified);
@@ -119,14 +120,29 @@ void open_dialog_properties(void) {
   IupSetHandle("prop_size", val_size);
 
   Ihandle *btn_close = IupButton("Zamknij", NULL);
+  IupSetCallback(btn_close, "ACTION", item_exit_click_dialog);
 
-  Ihandle *vbox = IupVbox(box_name, box_path, box_date_created, box_date_modified, box_date_last_used,
-    box_size, btn_close, NULL);
+  Ihandle *vbox = IupGridBox(
+    label_name, val_name,
+    label_path, val_path,
+    label_date_created, val_date_created,
+    label_date_modified, val_date_modified,
+    label_date_last_used, val_date_last_used,
+    label_size, val_size,
+    btn_close, NULL);
 
   IupSetAttribute(vbox, "NMARGIN", "10x10");
+  IupSetAttribute(vbox, "ORIENTATION", "HORIZONTAL");
+  IupSetAttribute(vbox, "ALIGNMENTCOL", "ARIGHT");
+  IupSetAttribute(vbox, "NORMALIZESIZE", "BOTH");
+  IupSetAttribute(vbox, "EXPANDCHILDREN", "YES");
+  IupSetAttribute(vbox, "HOMOGENEOUSCOL", "YES");
+  IupSetAttribute(vbox, "SIZELIN", "-1");
+  IupSetAttribute(vbox, "NUMDIV", "2");
 
   Ihandle *dialog = IupDialog(vbox);
   IupSetAttribute(dialog, "TITLE", "Właściwości");
+  IupSetAttribute(dialog, "RESIZE", "NO");
 
   properties(selected_node->path);
 
