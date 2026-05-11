@@ -6,11 +6,11 @@ set(CMAKE_C_STANDARD 11)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 include_directories(lib/iup/include)
 link_directories(lib/iup)
-link_libraries(iup iupimglib)
+link_libraries(iup iupimglib cd iupcd iupcontrols)
 
 add_executable(iuptest main.c etc/iup.rc
         fmgr_win.c
         fmgr_win.h
         fmgr.c
         fmgr.h)
-target_link_libraries(iuptest iup iupimglib)
+target_link_libraries(iuptest iup iupimglib cd iupcd iupcontrols)

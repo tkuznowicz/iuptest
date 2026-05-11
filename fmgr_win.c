@@ -61,6 +61,46 @@ void list_drives(Ihandle *tree) {
     }
 }
 
+void list_files(const char *basePath, Ihandle *file_matrix) {
+    // int numl = IupGetInt(file_matrix, "NUMLIN");
+    // char *rm = malloc(6*sizeof(char));
+    // snprintf(rm, 6, "1-%i", numl);
+    //
+    // IupSetAttribute(file_matrix, "DELLIN", rm);
+    int nr = 1;
+
+    struct dirent *entry;
+    //Otwieramy katalog
+    DIR *dir = opendir(basePath);
+    struct stat statbuf;
+    if (dir == NULL) {
+        fprintf(stderr, "Unable to open directory %s: %s\n", basePath, strerror(errno));
+        return;
+    }
+
+    //Wczytujemy wszystkie pliki
+    while ((entry = readdir(dir)) != NULL) {
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
+            continue;
+        }
+
+        //Sprawdzamy, czy podana Ĺ›cieĹĽka to katalog
+        if (stat(basePath, &statbuf) == 0 && S_ISDIR(statbuf.st_mode))
+        {
+            printf("test %i", nr);
+            //Dodajemy pliki
+            IupSetAttribute(file_matrix, "ADDLIN", 0);
+            IupSetAttributeId2(file_matrix, "", nr,1, "IMGPAPER");
+            IupSetAttributeId2(file_matrix, "", nr, 2,  entry->d_name);
+            IupSetAttributeId2(file_matrix, "", nr, 3, "Dokument tekstowy (.txt)");
+            IupSetAttributeId2(file_matrix, "", nr, 4, "2 485 213 728 KB");
+            nr++;
+        }
+    }
+    IupSetAttribute(file_matrix, "REDRAW", "ALL");
+    closedir(dir);
+}
+
 void list_directories(const char *basePath, const int depth, tree_element *parent, Ihandle *tree) {
     struct dirent *entry;
     //Otwieramy katalog
@@ -94,10 +134,11 @@ void list_directories(const char *basePath, const int depth, tree_element *paren
             //Placeholder, ĹĽeby gaĹ‚Ä…Ĺş mogĹ‚a siÄ™ rozwinÄ…Ä‡
             IupSetAttributeId(tree, "ADDLEAF", IupGetInt(tree, "LASTADDNODE"), "<empty>");
         } else {
+            //Zmiana: pliki wysiwetlaja sie na liscie w oknie obok
             //Dodajemy liĹ›Ä‡ (plik)
-            IupSetAttributeId(tree, "ADDLEAF", depth, entry->d_name);
-            tree_element *file = create_tree_element(parent, 0, 0, entry->d_name, path);
-            IupTreeSetUserId(tree,  IupGetInt(tree, "LASTADDNODE"), file);
+            // IupSetAttributeId(tree, "ADDLEAF", depth, entry->d_name);
+            // tree_element *file = create_tree_element(parent, 0, 0, entry->d_name, path);
+            // IupTreeSetUserId(tree,  IupGetInt(tree, "LASTADDNODE"), file);
         }
     }
     closedir(dir);

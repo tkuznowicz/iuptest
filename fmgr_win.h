@@ -10,6 +10,7 @@ extern char SEPARATOR[1];
 
 void list_drives(Ihandle *tree);
 void list_directories(const char *basePath, int depth, tree_element *parent, Ihandle *tree);
+void list_files(const char *basePath, Ihandle *file_matrix);
 void open_directory_sys(const char *path);
 void delete_file(const char *path);
 void delete_directory(const char *basePath);

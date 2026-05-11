@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <iup.h>
+#include <iupcontrols.h>
 #include <string.h>
 #include <windows.h>
 #include "fmgr_win.h"
@@ -87,32 +88,20 @@ void open_dialog_properties(void) {
   Ihandle *label_name = IupLabel("Nazwa pliku: ");
   Ihandle *val_name = IupLabel(selected_node->name);
 
-  // Ihandle *box_name = IupHbox(label_name, val_name, NULL);
-
   Ihandle *label_path = IupLabel("Ścieżka: ");
   Ihandle *val_path = IupLabel(selected_node->path);
-
-  // Ihandle *box_path = IupHbox(label_path, val_path, NULL);
 
   Ihandle *label_date_created = IupLabel("Data utworzenia: ");
   Ihandle *val_date_created = IupLabel("");
 
-  // Ihandle *box_date_created = IupHbox(label_date_created, val_date_created, NULL);
-
   Ihandle *label_date_modified = IupLabel("Data modyfikacji: ");
   Ihandle *val_date_modified = IupLabel("");
-
-  // Ihandle *box_date_modified = IupHbox(label_date_modified, val_date_modified, NULL);
 
   Ihandle *label_date_last_used = IupLabel("Data ostatniego użycia: ");
   Ihandle *val_date_last_used = IupLabel("");
 
-  // Ihandle *box_date_last_used = IupHbox(label_date_last_used, val_date_last_used, NULL);
-
   Ihandle *label_size = IupLabel("Rozmiar: ");
   Ihandle *val_size = IupLabel("");
-
-  // Ihandle *box_size = IupHbox(label_size, val_size, NULL);
 
   IupSetHandle("prop_date_created", val_date_created);
   IupSetHandle("prop_date_modified", val_date_modified);
@@ -158,6 +147,7 @@ int tree_branch_opened(Ihandle *tree, const int id) {
 int tree_branch_clicked(Ihandle *tree, const int id) {
   const tree_element *dir = IupTreeGetUserId(tree, id);
   IupSetAttribute(IupGetHandle("address_bar"), "VALUE", dir->path);
+  list_files(dir->path, IupGetHandle("file_matrix"));
   return IUP_DEFAULT;
 }
 
@@ -287,8 +277,9 @@ Ihandle* create_button(char icon[], char tip[]) {
 }
 
 int main(int argc, char **argv) {
-  //Inicjalizacja Iup i iupimglib (do ikon)
+  //Inicjalizacja Iup i iupimglib (do ikon), iupcontrols (do matrix listy plikow)
   IupOpen(&argc, &argv);
+  IupControlsOpen();
   IupImageLibOpen();
 
   // 1. Tworzenie menu
@@ -465,7 +456,7 @@ int main(int argc, char **argv) {
   Ihandle *dir_list = IupTree();
   IupSetHandle("tree", dir_list);
   IupSetCallback(dir_list, "BRANCHOPEN_CB", (Icallback)tree_branch_opened);
-  IupSetCallback(dir_list, "EXECUTEBRANCH_CB", (Icallback)tree_branch_clicked);
+  IupSetCallback(dir_list, "SELECTION_CB", (Icallback)tree_branch_clicked);
   IupSetCallback(dir_list, "RIGHTCLICK_CB", (Icallback)tree_node_right_clicked);
   IupSetCallback(dir_list, "RENAME_CB", (Icallback)tree_node_renamed);
   IupSetAttribute(dir_list, "EXPAND", "VERTICAL");
@@ -478,19 +469,49 @@ int main(int argc, char **argv) {
 
 
   // Białe tło pod toolbarem
-  Ihandle *frame = IupBackgroundBox(NULL);
-  IupSetAttribute(frame, "BGCOLOR", "255 255 255");
-  IupSetAttribute(frame, "CANVASBOX", "YES");
-  IupSetAttribute(frame, "EXPAND", "YES");
+  // Ihandle *frame = IupBackgroundBox(NULL);
+  // IupSetAttribute(frame, "BGCOLOR", "255 255 255");
+  // IupSetAttribute(frame, "CANVASBOX", "YES");
+  // IupSetAttribute(frame, "EXPAND", "YES");
+
+
+  //Lista? Plików
+  Ihandle *file_matrix = IupMatrix(NULL);
+  IupSetAttribute(file_matrix, "EXPAND", "YES");
+  IupSetAttribute(file_matrix, "BGCOLOR", "0 255 255");
+  IupSetAttribute(file_matrix, "FRAMECOLOR", "0 255 255");
+  //TODO dynamicznie
+  IupSetAttribute(file_matrix, "NUMCOL", "4");
+  IupSetAttribute(file_matrix, "NUMLIN", "40");
+  IupSetAttribute(file_matrix, "NUMCOL_VISIBLE", "4");
+  IupSetAttribute(file_matrix, "READONLY", "YES");
+  IupSetAttribute(file_matrix, "RESIZEMATRIX", "YES");
+  IupSetAttribute(file_matrix, "ALIGNMENT", "ALEFT");
+  IupSetAttribute(file_matrix, "TYPE*:1", "IMAGE");
+
+
+  //test
+  IupSetAttribute(file_matrix, "0:1", "");
+  IupSetAttribute(file_matrix, "0:2", "Nazwa");
+  IupSetAttribute(file_matrix, "0:3", "Typ");
+  IupSetAttribute(file_matrix, "0:4", "Rozmiar");
+  IupSetAttribute(file_matrix, "1:1", "IMGPAPER");
+  IupSetAttribute(file_matrix, "1:2", "nowy dokument tekstowy programu notatnik (test) (1) (kopia) (kopia)(kopia).txt");
+  IupSetAttribute(file_matrix, "1:3", "Dokument tekstowy (.txt)");
+  IupSetAttribute(file_matrix, "1:4", "2 485 213 728 KB");
+  IupSetAttribute(file_matrix, "2:1", "IMGPAPER");
+
+  IupSetAttribute(file_matrix, "RASTERWIDTH1", "16");
+  IupSetHandle("file_matrix", file_matrix);
 
   //StatusBar
-  Ihandle *status_bar = IupLabel("test statusbara");
-  IupSetAttribute(status_bar, "EXPAND", "HORIZONTAL");
+  Ihandle *status_bar = IupLabel("0 plików, 0 folderów.");
+  IupSetAttribute(status_bar, "EXPAND", "HORIZONTALFREE");
   IupSetAttribute(status_bar, "PADDING", "10x5");
 
   //Kontener do okna plikow
   Ihandle *file_list = IupVbox(
-    frame,
+    file_matrix,
     status_bar);
 
 
@@ -579,6 +600,8 @@ int main(int argc, char **argv) {
   IupSetAttribute(dlg, "USERSIZE", NULL);
 
   build_tree();
+  IupSetAttribute(file_matrix, "FITTOSIZE", "COLUMNS");
+
 
   IupMainLoop();
   IupClose();
