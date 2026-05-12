@@ -144,7 +144,8 @@ int tree_branch_opened(Ihandle *tree, const int id) {
   return IUP_DEFAULT;
 }
 
-int tree_branch_clicked(Ihandle *tree, const int id) {
+int tree_branch_clicked(Ihandle *tree, const int id, const int status) {
+  if (status != 1) return IUP_DEFAULT;
   const tree_element *dir = IupTreeGetUserId(tree, id);
   IupSetAttribute(IupGetHandle("address_bar"), "VALUE", dir->path);
   list_files(dir->path, IupGetHandle("file_matrix"));

@@ -62,15 +62,14 @@ void list_drives(Ihandle *tree) {
 }
 
 void list_files(const char *basePath, Ihandle *file_matrix) {
-    // int numl = IupGetInt(file_matrix, "NUMLIN");
-    // char *rm = malloc(6*sizeof(char));
-    // snprintf(rm, 6, "1-%i", numl);
-    //
-    // IupSetAttribute(file_matrix, "DELLIN", rm);
+    int numl = IupGetInt(file_matrix, "NUMLIN");
+    char *rm = malloc(6*sizeof(char));
+    snprintf(rm, 6, "1-%i", numl);
+
+    IupSetAttribute(file_matrix, "DELLIN", rm);
     int nr = 1;
 
     struct dirent *entry;
-    //Otwieramy katalog
     DIR *dir = opendir(basePath);
     struct stat statbuf;
     if (dir == NULL) {
@@ -83,19 +82,22 @@ void list_files(const char *basePath, Ihandle *file_matrix) {
         if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
             continue;
         }
-
+        char *path = malloc(32769);
+        //Formatujemy nowÄ… Ĺ›cieĹĽkÄ™
+        snprintf(path, 1024, "%s%s%s", basePath, SEPARATOR, entry->d_name);
         //Sprawdzamy, czy podana Ĺ›cieĹĽka to katalog
-        if (stat(basePath, &statbuf) == 0 && S_ISDIR(statbuf.st_mode))
+        if (stat(path, &statbuf) == 0 && !S_ISDIR(statbuf.st_mode))
         {
-            printf("test %i", nr);
+            printf("test %i\n", nr);
             //Dodajemy pliki
-            IupSetAttribute(file_matrix, "ADDLIN", 0);
+            IupSetInt(file_matrix, "ADDLIN", nr);
             IupSetAttributeId2(file_matrix, "", nr,1, "IMGPAPER");
             IupSetAttributeId2(file_matrix, "", nr, 2,  entry->d_name);
             IupSetAttributeId2(file_matrix, "", nr, 3, "Dokument tekstowy (.txt)");
             IupSetAttributeId2(file_matrix, "", nr, 4, "2 485 213 728 KB");
             nr++;
         }
+        free(path);
     }
     IupSetAttribute(file_matrix, "REDRAW", "ALL");
     closedir(dir);
@@ -140,6 +142,7 @@ void list_directories(const char *basePath, const int depth, tree_element *paren
             // tree_element *file = create_tree_element(parent, 0, 0, entry->d_name, path);
             // IupTreeSetUserId(tree,  IupGetInt(tree, "LASTADDNODE"), file);
         }
+        free(path);
     }
     closedir(dir);
 }
