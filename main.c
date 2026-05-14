@@ -246,6 +246,15 @@ int action_refresh(void) {
   return IUP_DEFAULT;
 }
 
+int file_matrix_cell_clicked(Ihandle *ih, int lin, int col, const char *status)
+{
+  IupSetIntId2(ih, "MARK", lin, col, 1);
+  if (iup_isbutton3(status)){
+     IupPopup(IupGetHandle("popup_tree_leaf"), IUP_MOUSEPOS, IUP_MOUSEPOS);
+  }
+  return IUP_DEFAULT;
+}
+
 int tree_node_renamed(Ihandle *tree, const int id, const char *new_title) {
   tree_element *branch = IupTreeGetUserId(tree, id);
   const char *old_path = branch->path;
@@ -266,14 +275,16 @@ int tree_node_renamed(Ihandle *tree, const int id, const char *new_title) {
  * Funkcja pomocnicza do tworzenia przycisków
  * @param icon
  * @param tip
+ * @param disabled
  * @return
  */
-Ihandle* create_button(char icon[], char tip[]) {
+Ihandle* create_button(char icon[], char tip[], int disabled) {
   Ihandle *btn = IupButton(NULL, NULL);
   IupSetAttribute(btn, "IMAGE", icon);
   IupSetAttribute(btn, "FLAT", "Yes");
   IupSetAttribute(btn, "CANFOCUS", "No");
   IupSetAttribute(btn, "TIP", tip);
+  IupSetAttribute(btn, "ACTIVE", disabled?"NO":"YES");
   return btn;
 }
 
@@ -370,24 +381,24 @@ int main(int argc, char **argv) {
   // 2. Toolbar z ikonami
 
   //Przyciski
-  Ihandle *btn_left = create_button("IUP_ArrowLeft", "Wstecz");
-  Ihandle *btn_right = create_button("IUP_ArrowRight", "Do przodu");
-  Ihandle *btn_up = create_button("IUP_ArrowUp", "Do góry");
-  Ihandle *btn_home = create_button("IUP_NavigateHome", "Katalog domowy");
-  Ihandle *btn_refresh = create_button("IUP_NavigateRefresh", "Odśwież");
+  Ihandle *btn_left = create_button("IUP_ArrowLeft", "Wstecz", 1);
+  Ihandle *btn_right = create_button("IUP_ArrowRight", "Do przodu", 1);
+  Ihandle *btn_up = create_button("IUP_ArrowUp", "Do góry", 1);
+  Ihandle *btn_home = create_button("IUP_NavigateHome", "Katalog domowy", 0);
+  Ihandle *btn_refresh = create_button("IUP_NavigateRefresh", "Odśwież", 0);
   IupSetCallback(btn_refresh, "ACTION", (Icallback)action_refresh);
-  Ihandle *btn_cut = create_button("IUP_EditCut", "Wytnij...");
-  Ihandle *btn_copy = create_button("IUP_EditCopy", "Kopiuj...");
-  Ihandle *btn_paste = create_button("IUP_EditPaste", "Wklej...");
-  Ihandle *btn_delete = create_button("IUP_EditErase", "Usuń...");
-  Ihandle *btn_properties = create_button("IUP_FileProperties", "Właściwości...");
-  Ihandle *btn_new_directory = create_button("IUP_FileClose", "Utwórz katalog...");
-  Ihandle *btn_new_file = create_button("IUP_FileNew", "Utwórz plik...");
-  Ihandle *btn_undo = create_button("IUP_EditUndo", "Cofnij");
-  Ihandle *btn_redo = create_button("IUP_EditRedo", "Powtórz");
-  Ihandle *btn_sort = create_button("IUP_ToolsSortAscend", "Sortowanie...");
-  Ihandle *btn_settings = create_button("IUP_ToolsSettings", "Ustawienia");
-  Ihandle *btn_help = create_button("IUP_MessageHelp", "Pomoc");
+  Ihandle *btn_cut = create_button("IUP_EditCut", "Wytnij...", 1);
+  Ihandle *btn_copy = create_button("IUP_EditCopy", "Kopiuj...", 1);
+  Ihandle *btn_paste = create_button("IUP_EditPaste", "Wklej...", 1);
+  Ihandle *btn_delete = create_button("IUP_EditErase", "Usuń...", 1);
+  Ihandle *btn_properties = create_button("IUP_FileProperties", "Właściwości...", 1);
+  Ihandle *btn_new_directory = create_button("IUP_FileClose", "Utwórz katalog...", 0);
+  Ihandle *btn_new_file = create_button("IUP_FileNew", "Utwórz plik...", 0);
+  Ihandle *btn_undo = create_button("IUP_EditUndo", "Cofnij", 1);
+  Ihandle *btn_redo = create_button("IUP_EditRedo", "Powtórz", 1);
+  Ihandle *btn_sort = create_button("IUP_ToolsSortAscend", "Sortowanie...", 0);
+  Ihandle *btn_settings = create_button("IUP_ToolsSettings", "Ustawienia", 0);
+  Ihandle *btn_help = create_button("IUP_MessageHelp", "Pomoc", 0);
 
   //Sam Toolbar (hbox — horizontal box)
   Ihandle *toolbar_hb = IupHbox(
@@ -479,34 +490,29 @@ int main(int argc, char **argv) {
   //Lista? Plików
   Ihandle *file_matrix = IupMatrix(NULL);
   IupSetAttribute(file_matrix, "EXPAND", "YES");
-  IupSetAttribute(file_matrix, "BGCOLOR", "0 255 255");
-  IupSetAttribute(file_matrix, "FRAMECOLOR", "0 255 255");
+  IupSetAttribute(file_matrix, "BGCOLOR", "255 255 255");
+  IupSetAttribute(file_matrix, "FRAMECOLOR", "255 255 255");
   //TODO dynamicznie
   IupSetAttribute(file_matrix, "NUMCOL", "4");
-  IupSetAttribute(file_matrix, "NUMLIN", "40");
   IupSetAttribute(file_matrix, "NUMCOL_VISIBLE", "4");
   IupSetAttribute(file_matrix, "READONLY", "YES");
   IupSetAttribute(file_matrix, "RESIZEMATRIX", "YES");
   IupSetAttribute(file_matrix, "ALIGNMENT", "ALEFT");
   IupSetAttribute(file_matrix, "TYPE*:1", "IMAGE");
 
-
-  //test
   IupSetAttribute(file_matrix, "0:1", "");
   IupSetAttribute(file_matrix, "0:2", "Nazwa");
   IupSetAttribute(file_matrix, "0:3", "Typ");
   IupSetAttribute(file_matrix, "0:4", "Rozmiar");
-  IupSetAttribute(file_matrix, "1:1", "IMGPAPER");
-  IupSetAttribute(file_matrix, "1:2", "nowy dokument tekstowy programu notatnik (test) (1) (kopia) (kopia)(kopia).txt");
-  IupSetAttribute(file_matrix, "1:3", "Dokument tekstowy (.txt)");
-  IupSetAttribute(file_matrix, "1:4", "2 485 213 728 KB");
-  IupSetAttribute(file_matrix, "2:1", "IMGPAPER");
 
   IupSetAttribute(file_matrix, "RASTERWIDTH1", "16");
+  IupSetAttribute(file_matrix, "MARKMODE", "LIN");
+  // IupSetAttribute(file_matrix, "HLCOLOR", "0 0 0");
+  IupSetCallback(file_matrix, "CLICK_CB", (Icallback)file_matrix_cell_clicked);
   IupSetHandle("file_matrix", file_matrix);
 
   //StatusBar
-  Ihandle *status_bar = IupLabel("0 plików, 0 folderów.");
+  Ihandle *status_bar = IupLabel("0 plików.");
   IupSetAttribute(status_bar, "EXPAND", "HORIZONTALFREE");
   IupSetAttribute(status_bar, "PADDING", "10x5");
 
@@ -604,6 +610,7 @@ int main(int argc, char **argv) {
   IupSetAttribute(file_matrix, "FITTOSIZE", "COLUMNS");
 
 
+  IupSetHandle("status_bar", status_bar);
   IupMainLoop();
   IupClose();
   return EXIT_SUCCESS;

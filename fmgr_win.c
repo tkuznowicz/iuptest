@@ -86,19 +86,28 @@ void list_files(const char *basePath, Ihandle *file_matrix) {
         //Formatujemy nowÄ… Ĺ›cieĹĽkÄ™
         snprintf(path, 1024, "%s%s%s", basePath, SEPARATOR, entry->d_name);
         //Sprawdzamy, czy podana Ĺ›cieĹĽka to katalog
+        char *size = malloc(sizeof(char)*32);
+
+
         if (stat(path, &statbuf) == 0 && !S_ISDIR(statbuf.st_mode))
         {
-            printf("test %i\n", nr);
+            //todo sofrmatowac to spacja czy cos nwm huj
+            snprintf(size, 32, "%ld KB", statbuf.st_size<0 ? 0 : statbuf.st_size/1000);
+
             //Dodajemy pliki
             IupSetInt(file_matrix, "ADDLIN", nr);
             IupSetAttributeId2(file_matrix, "", nr,1, "IMGPAPER");
             IupSetAttributeId2(file_matrix, "", nr, 2,  entry->d_name);
-            IupSetAttributeId2(file_matrix, "", nr, 3, "Dokument tekstowy (.txt)");
-            IupSetAttributeId2(file_matrix, "", nr, 4, "2 485 213 728 KB");
+            IupSetAttributeId2(file_matrix, "", nr, 3, "Plik");
+            IupSetAttributeId2(file_matrix, "", nr, 4, size);
             nr++;
         }
         free(path);
     }
+    char part0[8] = "Pliki: \0";
+    char* status = malloc(64);
+    snprintf(status, sizeof(status), "%i", nr-1);
+    IupSetAttribute(IupGetHandle("status_bar"), "TITLE", status);
     IupSetAttribute(file_matrix, "REDRAW", "ALL");
     closedir(dir);
 }
@@ -204,6 +213,11 @@ void properties(const char* path)
     free(attr);
     free(time);
 }
+
+// ULONGLONG get_file_size()
+// {
+//
+// }
 
 void delete_directory(const char* basePath) {
     struct dirent *entry;
