@@ -10,8 +10,9 @@
 #include "fmgr_win.h"
 #include "fmgr.h"
 
-char current_path[1024] = "";
 tree_element *selected_node = NULL;
+int selected_file_col = -1;
+int selected_file_lin = -1;
 
 /**
  * Funkcja obsługująca kliknięcie "Wyjdź" z menu "Plik"
@@ -163,8 +164,6 @@ int tree_node_right_clicked(Ihandle *tree, const int id) {
     IupSetAttribute(IupGetHandle("popup_tree_branch_rename"), "ACTIVE", is_special?"NO":"YES");
     IupSetAttribute(IupGetHandle("popup_tree_branch_delete"), "ACTIVE", is_special?"NO":"YES");
     IupPopup(IupGetHandle("popup_tree_branch"), IUP_MOUSEPOS, IUP_MOUSEPOS);
-  } else {
-    IupPopup(IupGetHandle("popup_tree_leaf"), IUP_MOUSEPOS, IUP_MOUSEPOS);
   }
   return IUP_DEFAULT;
 }
@@ -209,7 +208,7 @@ int popup_tree_branch_delete_click(void) {
   return IUP_DEFAULT;
 }
 
-int popup_tree_leaf_delete_click(void) {
+int popup_file_delete_click(void) {
   if (selected_node != NULL) {
     Ihandle *tree = IupGetHandle("tree");
 
@@ -225,7 +224,7 @@ int popup_tree_leaf_delete_click(void) {
   return IUP_DEFAULT;
 }
 
-int popup_tree_node_rename_click(void) {
+int popup_file_rename_click(void) {
   if (selected_node != NULL) {
     IupSetInt(IupGetHandle("tree"), "RENAME", IupTreeGetId(IupGetHandle("tree"), selected_node));
   } else {
@@ -246,11 +245,13 @@ int action_refresh(void) {
   return IUP_DEFAULT;
 }
 
-int file_matrix_cell_clicked(Ihandle *ih, int lin, int col, const char *status)
+int file_matrix_cell_clicked(Ihandle *ih, const int lin, const int col, const char *status)
 {
   IupSetIntId2(ih, "MARK", lin, col, 1);
+  selected_file_col = col;
+  selected_file_lin = lin;
   if (iup_isbutton3(status)){
-     IupPopup(IupGetHandle("popup_tree_leaf"), IUP_MOUSEPOS, IUP_MOUSEPOS);
+     IupPopup(IupGetHandle("popup_file"), IUP_MOUSEPOS, IUP_MOUSEPOS);
   }
   return IUP_DEFAULT;
 }
@@ -278,7 +279,7 @@ int tree_node_renamed(Ihandle *tree, const int id, const char *new_title) {
  * @param disabled
  * @return
  */
-Ihandle* create_button(char icon[], char tip[], int disabled) {
+Ihandle* create_button(char icon[], char tip[], const int disabled) {
   Ihandle *btn = IupButton(NULL, NULL);
   IupSetAttribute(btn, "IMAGE", icon);
   IupSetAttribute(btn, "FLAT", "Yes");
@@ -437,10 +438,7 @@ int main(int argc, char **argv) {
 
   //Label dla paska adresu
   Ihandle *address_bar_label = IupLabel("Adres:");
-  IupSetAttribute(address_bar_label, "ALIGNMENT", "ACENTER:ACENTER");
-  IupSetAttribute(address_bar_label, "EXPAND", "VERTICALFREE");
-  IupSetAttribute(address_bar_label, "PADDING", "10");
-
+  IupSetAttributes(address_bar_label, "ALIGNMENT=ACENTER:ACENTER, EXPAND=VERTICALFREE, PADDING=10");
 
   //Pasek adresu
   Ihandle *address_bar = IupList(NULL);
@@ -474,20 +472,9 @@ int main(int argc, char **argv) {
   IupSetAttribute(dir_list, "EXPAND", "VERTICAL");
   IupSetAttribute(dir_list, "ADDROOT", "NO");
   IupSetAttribute(dir_list, "SHOWRENAME", "YES");
-  //Ikona plikow
-  IupSetAttribute(dir_list, "IMAGELEAF", "IMGPAPER");
 
 
-
-
-  // Białe tło pod toolbarem
-  // Ihandle *frame = IupBackgroundBox(NULL);
-  // IupSetAttribute(frame, "BGCOLOR", "255 255 255");
-  // IupSetAttribute(frame, "CANVASBOX", "YES");
-  // IupSetAttribute(frame, "EXPAND", "YES");
-
-
-  //Lista? Plików
+  //Lista Plików
   Ihandle *file_matrix = IupMatrix(NULL);
   IupSetAttribute(file_matrix, "EXPAND", "YES");
   IupSetAttribute(file_matrix, "BGCOLOR", "255 255 255");
@@ -507,7 +494,6 @@ int main(int argc, char **argv) {
 
   IupSetAttribute(file_matrix, "RASTERWIDTH1", "16");
   IupSetAttribute(file_matrix, "MARKMODE", "LIN");
-  // IupSetAttribute(file_matrix, "HLCOLOR", "0 0 0");
   IupSetCallback(file_matrix, "CLICK_CB", (Icallback)file_matrix_cell_clicked);
   IupSetHandle("file_matrix", file_matrix);
 
@@ -563,39 +549,40 @@ int main(int argc, char **argv) {
   IupSetCallback(popup_tree_branch_expand, "ACTION", (Icallback)popup_tree_branch_expand_click);
   IupSetCallback(popup_tree_branch_collapse, "ACTION", (Icallback)popup_tree_branch_collapse_click);
   IupSetCallback(popup_tree_branch_delete, "ACTION", (Icallback)popup_tree_branch_delete_click);
-  IupSetCallback(popup_tree_branch_rename, "ACTION", (Icallback)popup_tree_node_rename_click);
+  IupSetCallback(popup_tree_branch_rename, "ACTION", (Icallback)popup_file_rename_click);
   IupSetCallback(popup_tree_branch_properties, "ACTION", (Icallback)open_dialog_properties);
 
 
-  //Menu kontekstowe przy prawym kliknieciu pliku w drzewie katalogu
-  Ihandle *popup_tree_leaf_open = IupItem("Otwórz plik", NULL);
-  Ihandle *popup_tree_leaf_rename = IupItem("Zmień nazwę", NULL);
-  Ihandle *popup_tree_leaf_cut = IupItem("Wytnij", NULL);
-  Ihandle *popup_tree_leaf_copy = IupItem("Kopiuj", NULL);
-  Ihandle *popup_tree_leaf_delete = IupItem("Usuń", NULL);
-  Ihandle *popup_tree_leaf_properties = IupItem("Właściwości", NULL);
+  //Menu kontekstowe przy prawym kliknieciu pliku
+  Ihandle *popup_file_open = IupItem("Otwórz plik", NULL);
+  Ihandle *popup_file_rename = IupItem("Zmień nazwę", NULL);
+  Ihandle *popup_file_cut = IupItem("Wytnij", NULL);
+  Ihandle *popup_file_copy = IupItem("Kopiuj", NULL);
+  Ihandle *popup_file_delete = IupItem("Usuń", NULL);
+  Ihandle *popup_file_properties = IupItem("Właściwości", NULL);
 
-  Ihandle *popup_tree_leaf = IupMenu(
-    popup_tree_leaf_open,
-    popup_tree_leaf_rename,
-    popup_tree_leaf_cut,
-    popup_tree_leaf_copy,
-    popup_tree_leaf_delete,
+  Ihandle *popup_file = IupMenu(
+    popup_file_open,
     IupSeparator(),
-    popup_tree_leaf_properties,
+    popup_file_rename,
+    popup_file_cut,
+    popup_file_copy,
+    popup_file_delete,
+    IupSeparator(),
+    popup_file_properties,
     NULL);
-  IupSetHandle("popup_tree_leaf", popup_tree_leaf);
-  IupSetCallback(popup_tree_leaf_delete, "ACTION", (Icallback)popup_tree_leaf_delete_click);
-  IupSetCallback(popup_tree_leaf_rename, "ACTION", (Icallback)popup_tree_node_rename_click);
-  IupSetCallback(popup_tree_leaf_cut, "ACTION", (Icallback)open_dialog_cut);
-  IupSetCallback(popup_tree_leaf_properties, "ACTION", (Icallback)open_dialog_properties);
+  IupSetHandle("popup_file", popup_file);
+  IupSetCallback(popup_file_delete, "ACTION", (Icallback)popup_file_delete_click);
+  IupSetCallback(popup_file_rename, "ACTION", (Icallback)popup_file_rename_click);
+  IupSetCallback(popup_file_cut, "ACTION", (Icallback)open_dialog_cut);
+  IupSetCallback(popup_file_properties, "ACTION", (Icallback)open_dialog_properties);
 
   //Główne okno
   Ihandle *dlg = IupDialog(vbox);
   //Podpięcie menu do okna
   IupSetAttributeHandle(dlg, "MENU", menu);
   //Tytuł okna
-  IupSetAttribute(dlg, "TITLE", "File Explorer");
+  IupSetAttribute(dlg, "TITLE", "Menedżer plików");
   //Rozmiar okna
   IupSetAttribute(dlg, "SIZE", "HALFxHALF");
 
