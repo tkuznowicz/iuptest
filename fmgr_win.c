@@ -39,7 +39,7 @@ void list_drives(Ihandle *tree) {
     }
 
     if (r <= MAX_PATH) {
-        wchar_t *SingleDrive = LogicalDrives;
+        const wchar_t *SingleDrive = LogicalDrives;
 
         while (*SingleDrive) {
             char* drive_str = malloc(8);
@@ -144,12 +144,6 @@ void list_directories(const char *basePath, const int depth, tree_element *paren
             IupTreeSetUserId(tree, IupGetInt(tree, "LASTADDNODE"), directory);
             //Placeholder, ĹĽeby gaĹ‚Ä…Ĺş mogĹ‚a siÄ™ rozwinÄ…Ä‡
             IupSetAttributeId(tree, "ADDLEAF", IupGetInt(tree, "LASTADDNODE"), "<empty>");
-        } else {
-            //Zmiana: pliki wysiwetlaja sie na liscie w oknie obok
-            //Dodajemy liĹ›Ä‡ (plik)
-            // IupSetAttributeId(tree, "ADDLEAF", depth, entry->d_name);
-            // tree_element *file = create_tree_element(parent, 0, 0, entry->d_name, path);
-            // IupTreeSetUserId(tree,  IupGetInt(tree, "LASTADDNODE"), file);
         }
         free(path);
     }
@@ -214,11 +208,6 @@ void properties(const char* path)
     free(time);
 }
 
-// ULONGLONG get_file_size()
-// {
-//
-// }
-
 void delete_directory(const char* basePath) {
     struct dirent *entry;
     DIR *dir = opendir(basePath);
@@ -256,5 +245,13 @@ void rename_element(const char* path, char* new_name) {
         printf("Successfully renamed %s to %s\n", path, new_name);
     } else {
         fprintf(stderr, "Could not rename %s to %s: %s\n", path, new_name, strerror(errno));
+    }
+}
+
+void create_directory(const char* path) {
+    if (mkdir(path) == 0) {
+        printf("Successfully created new directory at %s\n", path);
+    } else {
+        fprintf(stderr, "Could not create directory %s: %s\n", path, strerror(errno));
     }
 }

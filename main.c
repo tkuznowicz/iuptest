@@ -148,8 +148,11 @@ int tree_branch_opened(Ihandle *tree, const int id) {
 int tree_branch_clicked(Ihandle *tree, const int id, const int status) {
   if (status != 1) return IUP_DEFAULT;
   const tree_element *dir = IupTreeGetUserId(tree, id);
-  IupSetAttribute(IupGetHandle("address_bar"), "VALUE", dir->path);
-  list_files(dir->path, IupGetHandle("file_matrix"));
+  if (strcmp(dir->path, "!") != 0) {
+    IupSetAttribute(IupGetHandle("address_bar"), "VALUE", dir->path);
+    list_files(dir->path, IupGetHandle("file_matrix"));
+    selected_file_col = selected_file_lin = -1;
+  }
   return IUP_DEFAULT;
 }
 
@@ -157,14 +160,13 @@ int tree_node_right_clicked(Ihandle *tree, const int id) {
   IupSetAttributeId(tree, "MARKED", id, "YES");
   selected_node = IupTreeGetUserId(tree, id);
 
-  if (selected_node->is_directory) {
-    const int is_root = strcmp(selected_node->path, "!") == 0;
-    const int is_special = is_root || selected_node->is_special;
-    IupSetAttribute(IupGetHandle("popup_tree_branch_open"), "ACTIVE", is_root?"NO":"YES");
-    IupSetAttribute(IupGetHandle("popup_tree_branch_rename"), "ACTIVE", is_special?"NO":"YES");
-    IupSetAttribute(IupGetHandle("popup_tree_branch_delete"), "ACTIVE", is_special?"NO":"YES");
-    IupPopup(IupGetHandle("popup_tree_branch"), IUP_MOUSEPOS, IUP_MOUSEPOS);
-  }
+  const int is_root = strcmp(selected_node->path, "!") == 0;
+  const int is_special = is_root || selected_node->is_special;
+  IupSetAttribute(IupGetHandle("popup_tree_branch_open"), "ACTIVE", is_root?"NO":"YES");
+  IupSetAttribute(IupGetHandle("popup_tree_branch_rename"), "ACTIVE", is_special?"NO":"YES");
+  IupSetAttribute(IupGetHandle("popup_tree_branch_delete"), "ACTIVE", is_special?"NO":"YES");
+  IupPopup(IupGetHandle("popup_tree_branch"), IUP_MOUSEPOS, IUP_MOUSEPOS);
+
   return IUP_DEFAULT;
 }
 
@@ -257,7 +259,7 @@ int file_matrix_cell_clicked(Ihandle *ih, const int lin, const int col, const ch
 }
 
 int tree_node_renamed(Ihandle *tree, const int id, const char *new_title) {
-  tree_element *branch = IupTreeGetUserId(tree, id);
+  const tree_element *branch = IupTreeGetUserId(tree, id);
   const char *old_path = branch->path;
 
   tree_element *parent = branch->parent;

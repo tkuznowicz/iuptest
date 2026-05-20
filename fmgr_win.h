@@ -16,4 +16,5 @@ void delete_file(const char *path);
 void delete_directory(const char *basePath);
 void rename_element(const char *path, char *new_name);
 void properties(const char *path);
+void create_directory(const char *path);
 #endif //IUPTEST_FMGR_WIN_H

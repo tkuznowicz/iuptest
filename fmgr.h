@@ -16,5 +16,5 @@ typedef struct tree_element {
     char *name;
     char *path;
 } tree_element;
-tree_element *create_tree_element(tree_element *parent, const int is_directory, const int is_special, const char *name, const char *path);
+tree_element *create_tree_element(tree_element *parent, int is_directory, int is_special, const char *name, const char *path);
 #endif //IUPTEST_FMGR_H
