@@ -10,9 +10,9 @@
 #include "fmgr_win.h"
 #include "fmgr.h"
 
-tree_element *selected_node = NULL;
-int selected_file_col = -1;
-int selected_file_lin = -1;
+tree_element *selected_directory = NULL;
+tree_element *selected_file = NULL;
+int is_selected_file = -1;
 
 /**
  * Funkcja obsługująca kliknięcie "Wyjdź" z menu "Plik"
@@ -86,11 +86,20 @@ void open_dialog_cut(void) {
 }
 
 void open_dialog_properties(void) {
+  tree_element *node;
+  if (is_selected_file == 1) {
+    node = selected_file;
+  } else {
+    node = selected_directory;
+  }
+
+  printf("selected node type: %i, path: %s", is_selected_file, node->path);
+
   Ihandle *label_name = IupLabel("Nazwa pliku: ");
-  Ihandle *val_name = IupLabel(selected_node->name);
+  Ihandle *val_name = IupLabel(node->name);
 
   Ihandle *label_path = IupLabel("Ścieżka: ");
-  Ihandle *val_path = IupLabel(selected_node->path);
+  Ihandle *val_path = IupLabel(node->path);
 
   Ihandle *label_date_created = IupLabel("Data utworzenia: ");
   Ihandle *val_date_created = IupLabel("");
@@ -134,7 +143,7 @@ void open_dialog_properties(void) {
   IupSetAttribute(dialog, "TITLE", "Właściwości");
   IupSetAttribute(dialog, "RESIZE", "NO");
 
-  properties(selected_node->path);
+  properties(node->path);
 
 
   IupShow(dialog);
@@ -144,24 +153,49 @@ int tree_branch_opened(Ihandle *tree, const int id) {
   reload_directory(IupTreeGetUserId(tree, id));
   return IUP_DEFAULT;
 }
-
-int tree_branch_clicked(Ihandle *tree, const int id, const int status) {
-  if (status != 1) return IUP_DEFAULT;
-  const tree_element *dir = IupTreeGetUserId(tree, id);
-  if (strcmp(dir->path, "!") != 0) {
-    IupSetAttribute(IupGetHandle("address_bar"), "VALUE", dir->path);
-    list_files(dir->path, IupGetHandle("file_matrix"));
-    selected_file_col = selected_file_lin = -1;
+void change_selection(tree_element *selection) {
+  if (selection->is_directory) {
+    is_selected_file = 0;
+    if (strcmp(selection->path, "!") == 0) {
+      //clear file matrix todo
+      return;
+    }
+    IupSetAttribute(IupGetHandle("address_bar"), "VALUE", selection->path);
+    if (selected_directory == NULL  || strcmp(selected_directory->path, selection->path) != 0) {
+      list_files(selection->path, IupGetHandle("file_matrix"));
+    }
+    selected_directory = selection;
+    if (selected_file != NULL) {
+      IupSetIntId2(IupGetHandle("file_matrix"), "MARK", selected_file->file_id, 0, 0);
+      free(selected_file);
+      selected_file = NULL;
+    }
+  } else {
+    is_selected_file = 1;
+    if (selected_file != NULL) {
+      IupSetIntId2(IupGetHandle("file_matrix"), "MARK", selected_file->file_id, 0, 0);
+      free(selected_file);
+      selected_file = selection;
+      IupSetIntId2(IupGetHandle("file_matrix"), "MARK", selection->file_id, 0, 1);
+    }
   }
+}
+
+int directory_clicked(Ihandle *tree, const int id, const int status) {
+  if (status != 1) {
+    return IUP_DEFAULT;
+  }
+  tree_element *dir = IupTreeGetUserId(tree, id);
+  change_selection(dir);
   return IUP_DEFAULT;
 }
 
-int tree_node_right_clicked(Ihandle *tree, const int id) {
+int directory_right_clicked(Ihandle *tree, const int id) {
+  directory_clicked(tree, id, 1);
   IupSetAttributeId(tree, "MARKED", id, "YES");
-  selected_node = IupTreeGetUserId(tree, id);
 
-  const int is_root = strcmp(selected_node->path, "!") == 0;
-  const int is_special = is_root || selected_node->is_special;
+  const int is_root = strcmp(selected_directory->path, "!") == 0;
+  const int is_special = is_root || selected_directory->is_special;
   IupSetAttribute(IupGetHandle("popup_tree_branch_open"), "ACTIVE", is_root?"NO":"YES");
   IupSetAttribute(IupGetHandle("popup_tree_branch_rename"), "ACTIVE", is_special?"NO":"YES");
   IupSetAttribute(IupGetHandle("popup_tree_branch_delete"), "ACTIVE", is_special?"NO":"YES");
@@ -171,8 +205,8 @@ int tree_node_right_clicked(Ihandle *tree, const int id) {
 }
 
 int popup_tree_branch_open_click(void) {
-  if (selected_node != NULL) {
-    open_directory_sys(selected_node->path);
+  if (selected_directory != NULL) {
+    open_directory_sys(selected_directory->path);
   } else {
     fprintf(stderr, "Opening directory from right-click while no directory selected.\n");
   }
@@ -180,9 +214,9 @@ int popup_tree_branch_open_click(void) {
 }
 
 int popup_tree_branch_expand_click(void) {
-  if (selected_node != NULL) {
+  if (selected_directory != NULL) {
     //Trzeba teraz manualnie wczytać dzieci
-    const int id = IupTreeGetId(IupGetHandle("tree"), selected_node);
+    const int id = IupTreeGetId(IupGetHandle("tree"), selected_directory);
     tree_branch_opened(IupGetHandle("tree"), id);
     IupSetAttributeId(IupGetHandle("tree"), "STATE", id, "EXPANDED");
   } else {
@@ -192,8 +226,8 @@ int popup_tree_branch_expand_click(void) {
 }
 
 int popup_tree_branch_collapse_click(void) {
-  if (selected_node != NULL) {
-    IupSetAttributeId(IupGetHandle("tree"), "STATE", IupTreeGetId(IupGetHandle("tree"), selected_node), "COLLAPSED");
+  if (selected_directory != NULL) {
+    IupSetAttributeId(IupGetHandle("tree"), "STATE", IupTreeGetId(IupGetHandle("tree"), selected_directory), "COLLAPSED");
   } else {
     fprintf(stderr, "Collapsing directory from right-click while no directory selected.\n");
   }
@@ -201,9 +235,9 @@ int popup_tree_branch_collapse_click(void) {
 }
 
 int popup_tree_branch_delete_click(void) {
-  if (selected_node != NULL) {
-    delete_directory(selected_node->path);
-    reload_directory(selected_node->parent);
+  if (selected_directory != NULL) {
+    delete_directory(selected_directory->path);
+    reload_directory(selected_directory->parent);
   } else {
     fprintf(stderr, "Deleting directory from right-click while no directory selected.\n");
   }
@@ -211,12 +245,12 @@ int popup_tree_branch_delete_click(void) {
 }
 
 int popup_file_delete_click(void) {
-  if (selected_node != NULL) {
+  if (selected_directory != NULL) {
     Ihandle *tree = IupGetHandle("tree");
 
     //Ścieżka do folderu (rodzica)
-    const char *file_path = selected_node->path;
-    const int parent = IupGetIntId(tree, "PARENT", IupTreeGetId(IupGetHandle("tree"), selected_node));
+    const char *file_path = selected_directory->path;
+    const int parent = IupGetIntId(tree, "PARENT", IupTreeGetId(IupGetHandle("tree"), selected_directory));
 
     delete_file(file_path);
     tree_branch_opened(tree, parent);
@@ -227,8 +261,8 @@ int popup_file_delete_click(void) {
 }
 
 int popup_file_rename_click(void) {
-  if (selected_node != NULL) {
-    IupSetInt(IupGetHandle("tree"), "RENAME", IupTreeGetId(IupGetHandle("tree"), selected_node));
+  if (selected_directory != NULL) {
+    IupSetInt(IupGetHandle("tree"), "RENAME", IupTreeGetId(IupGetHandle("tree"), selected_directory));
   } else {
     fprintf(stderr, "Renaming element from right-click while no node selected.\n");
   }
@@ -249,9 +283,12 @@ int action_refresh(void) {
 
 int file_matrix_cell_clicked(Ihandle *ih, const int lin, const int col, const char *status)
 {
-  IupSetIntId2(ih, "MARK", lin, col, 1);
-  selected_file_col = col;
-  selected_file_lin = lin;
+  char* file_name = IupGetAttributeId2(ih, "", lin, 2);
+  char* file_path = malloc(32768);
+  snprintf(file_path, 32768, "%s%s%s", selected_directory->path, SEPARATOR, file_name);
+  tree_element *new_file = create_file(selected_directory, file_name, file_path, lin);
+  change_selection(new_file);
+
   if (iup_isbutton3(status)){
      IupPopup(IupGetHandle("popup_file"), IUP_MOUSEPOS, IUP_MOUSEPOS);
   }
@@ -267,7 +304,7 @@ int tree_node_renamed(Ihandle *tree, const int id, const char *new_title) {
 
   char new_path[32768];
   strcpy(new_path, parent_path);
-  strcpy(new_path, SEPARATOR);
+  strcat(new_path, SEPARATOR);
   strcat(new_path, new_title);
 
   rename_element(old_path, new_path);
@@ -468,8 +505,8 @@ int main(int argc, char **argv) {
   Ihandle *dir_list = IupTree();
   IupSetHandle("tree", dir_list);
   IupSetCallback(dir_list, "BRANCHOPEN_CB", (Icallback)tree_branch_opened);
-  IupSetCallback(dir_list, "SELECTION_CB", (Icallback)tree_branch_clicked);
-  IupSetCallback(dir_list, "RIGHTCLICK_CB", (Icallback)tree_node_right_clicked);
+  IupSetCallback(dir_list, "SELECTION_CB", (Icallback)directory_clicked);
+  IupSetCallback(dir_list, "RIGHTCLICK_CB", (Icallback)directory_right_clicked);
   IupSetCallback(dir_list, "RENAME_CB", (Icallback)tree_node_renamed);
   IupSetAttribute(dir_list, "EXPAND", "VERTICAL");
   IupSetAttribute(dir_list, "ADDROOT", "NO");

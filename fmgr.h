@@ -15,6 +15,8 @@ typedef struct tree_element {
     //Nazwa elementu i pełna ścieżka wraz z jego nazwą
     char *name;
     char *path;
+    int file_id;
 } tree_element;
-tree_element *create_tree_element(tree_element *parent, int is_directory, int is_special, const char *name, const char *path);
+tree_element *create_directory(tree_element *parent, int is_special, const char *name, const char *path);
+tree_element *create_file(tree_element *parent, const char *name, const char *path, int file_id);
 #endif //IUPTEST_FMGR_H

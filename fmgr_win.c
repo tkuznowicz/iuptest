@@ -20,7 +20,7 @@ void list_drives(Ihandle *tree) {
     //Dodajemy korzeĹ„
     IupSetAttribute(tree, "ADDBRANCH-1","Komputer");
     //Specjalny atrybut, jako ĹĽe korzeĹ„ to nie katalog i nie moĹĽna na nim wykonywaÄ‡ niektĂłrych operacji
-    tree_element *main = create_tree_element(NULL, 1, 1, "", "!");
+    tree_element *main = create_directory(NULL, 1, "", "!");
 
     const int last_added_id = IupGetInt(tree, "LASTADDNODE");
     IupTreeSetUserId(tree, last_added_id, main);
@@ -47,7 +47,7 @@ void list_drives(Ihandle *tree) {
 
             IupSetAttribute(tree, "ADDBRANCH",drive_str);
 
-            tree_element *drive = create_tree_element(main, 1, 1, drive_str, drive_str);
+            tree_element *drive = create_directory(main, 1, drive_str, drive_str);
             int last_added = IupGetInt(tree, "LASTADDNODE");
             IupTreeSetUserId(tree, last_added, drive);
             //Ikona dysku
@@ -136,7 +136,7 @@ void list_directories(const char *basePath, const int depth, tree_element *paren
             //Dodajemy nowÄ… gaĹ‚Ä…Ĺş (katalog)
             IupSetAttributeId(tree, "ADDBRANCH", depth, entry->d_name);
             //Ustawiamy Ĺ›cieĹĽkÄ™ katalogu jako jego id
-            tree_element *directory = create_tree_element(parent, 1, 0, entry->d_name, path);
+            tree_element *directory = create_directory(parent, 0, entry->d_name, path);
 
             //dbg
             // fprintf(stdout, "Creating branch of %s, %s, %s\n", directory->path, directory->name, path);
@@ -248,7 +248,7 @@ void rename_element(const char* path, char* new_name) {
     }
 }
 
-void create_directory(const char* path) {
+void create_directory_sys(const char* path) {
     if (mkdir(path) == 0) {
         printf("Successfully created new directory at %s\n", path);
     } else {
